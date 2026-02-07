@@ -1,0 +1,677 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1754FA7E2F36FA5000C3CD00 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = 1754FA7D2F36FA5000C3CD00 /* MCP */; };
+		1754FA7F2F36FA5100C3CD00 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = 1754FA802F36FA5100C3CD00 /* MCP */; };
+		1754FB312F37120000C3CD00 /* StatusBarPlugin.bundle in Embed PlugIns */ = {isa = PBXBuildFile; fileRef = 1754FB222F370E9B00C3CD00 /* StatusBarPlugin.bundle */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1754FA532F36F53B00C3CD00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1754FA3D2F36F53A00C3CD00 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1754FA442F36F53A00C3CD00;
+			remoteInfo = HomeKitMCP;
+		};
+		1754FB322F37120000C3CD00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1754FA3D2F36F53A00C3CD00 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1754FB212F370E9B00C3CD00;
+			remoteInfo = StatusBarPlugin;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1754FB332F37120000C3CD00 /* Embed PlugIns */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				1754FB312F37120000C3CD00 /* StatusBarPlugin.bundle in Embed PlugIns */,
+			);
+			name = "Embed PlugIns";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1754FA452F36F53A00C3CD00 /* HomeKitMCP.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomeKitMCP.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1754FA522F36F53B00C3CD00 /* HomeKitMCPTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HomeKitMCPTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1754FB222F370E9B00C3CD00 /* StatusBarPlugin.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StatusBarPlugin.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		17F0A0012F3A000000C3CD00 /* Local.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Local.xcconfig; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1754FB342F37120000C3CD00 /* Exceptions for "HomeKitMCP" folder in "StatusBarPlugin" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				StatusBarBridge.swift,
+			);
+			target = 1754FB212F370E9B00C3CD00 /* StatusBarPlugin */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		1754FA472F36F53A00C3CD00 /* HomeKitMCP */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1754FB342F37120000C3CD00 /* Exceptions for "HomeKitMCP" folder in "StatusBarPlugin" target */,
+			);
+			path = HomeKitMCP;
+			sourceTree = "<group>";
+		};
+		1754FA552F36F53B00C3CD00 /* HomeKitMCPTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = HomeKitMCPTests;
+			sourceTree = "<group>";
+		};
+		1754FB302F37120000C3CD00 /* StatusBarPlugin */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = StatusBarPlugin;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1754FA422F36F53A00C3CD00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1754FA7E2F36FA5000C3CD00 /* MCP in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1754FA4F2F36F53B00C3CD00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1754FA7F2F36FA5100C3CD00 /* MCP in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1754FB1F2F370E9B00C3CD00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1754FA3C2F36F53A00C3CD00 = {
+			isa = PBXGroup;
+			children = (
+				17F0A0012F3A000000C3CD00 /* Local.xcconfig */,
+				1754FA472F36F53A00C3CD00 /* HomeKitMCP */,
+				1754FB302F37120000C3CD00 /* StatusBarPlugin */,
+				1754FA552F36F53B00C3CD00 /* HomeKitMCPTests */,
+				1754FA462F36F53A00C3CD00 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1754FA462F36F53A00C3CD00 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1754FA452F36F53A00C3CD00 /* HomeKitMCP.app */,
+				1754FA522F36F53B00C3CD00 /* HomeKitMCPTests.xctest */,
+				1754FB222F370E9B00C3CD00 /* StatusBarPlugin.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1754FA442F36F53A00C3CD00 /* HomeKitMCP */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1754FA662F36F53B00C3CD00 /* Build configuration list for PBXNativeTarget "HomeKitMCP" */;
+			buildPhases = (
+				1754FA412F36F53A00C3CD00 /* Sources */,
+				1754FA422F36F53A00C3CD00 /* Frameworks */,
+				1754FA432F36F53A00C3CD00 /* Resources */,
+				1754FB332F37120000C3CD00 /* Embed PlugIns */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1754FB352F37120000C3CD00 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				1754FA472F36F53A00C3CD00 /* HomeKitMCP */,
+			);
+			name = HomeKitMCP;
+			packageProductDependencies = (
+				1754FA7D2F36FA5000C3CD00 /* MCP */,
+			);
+			productName = HomeKitMCP;
+			productReference = 1754FA452F36F53A00C3CD00 /* HomeKitMCP.app */;
+			productType = "com.apple.product-type.application";
+		};
+		1754FA512F36F53B00C3CD00 /* HomeKitMCPTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1754FA692F36F53B00C3CD00 /* Build configuration list for PBXNativeTarget "HomeKitMCPTests" */;
+			buildPhases = (
+				1754FA4E2F36F53B00C3CD00 /* Sources */,
+				1754FA4F2F36F53B00C3CD00 /* Frameworks */,
+				1754FA502F36F53B00C3CD00 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1754FA542F36F53B00C3CD00 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				1754FA552F36F53B00C3CD00 /* HomeKitMCPTests */,
+			);
+			name = HomeKitMCPTests;
+			packageProductDependencies = (
+				1754FA802F36FA5100C3CD00 /* MCP */,
+			);
+			productName = HomeKitMCPTests;
+			productReference = 1754FA522F36F53B00C3CD00 /* HomeKitMCPTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		1754FB212F370E9B00C3CD00 /* StatusBarPlugin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1754FB252F370E9B00C3CD00 /* Build configuration list for PBXNativeTarget "StatusBarPlugin" */;
+			buildPhases = (
+				1754FB1E2F370E9B00C3CD00 /* Sources */,
+				1754FB1F2F370E9B00C3CD00 /* Frameworks */,
+				1754FB202F370E9B00C3CD00 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1754FB302F37120000C3CD00 /* StatusBarPlugin */,
+			);
+			name = StatusBarPlugin;
+			packageProductDependencies = (
+			);
+			productName = StatusBarPlugin;
+			productReference = 1754FB222F370E9B00C3CD00 /* StatusBarPlugin.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1754FA3D2F36F53A00C3CD00 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					1754FA442F36F53A00C3CD00 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					1754FA512F36F53B00C3CD00 = {
+						CreatedOnToolsVersion = 26.2;
+						TestTargetID = 1754FA442F36F53A00C3CD00;
+					};
+					1754FB212F370E9B00C3CD00 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = 1754FA402F36F53A00C3CD00 /* Build configuration list for PBXProject "HomeKitMCP" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1754FA3C2F36F53A00C3CD00;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1754FA7C2F36FA4E00C3CD00 /* XCRemoteSwiftPackageReference "swift-sdk" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 1754FA462F36F53A00C3CD00 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1754FA442F36F53A00C3CD00 /* HomeKitMCP */,
+				1754FA512F36F53B00C3CD00 /* HomeKitMCPTests */,
+				1754FB212F370E9B00C3CD00 /* StatusBarPlugin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1754FA432F36F53A00C3CD00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1754FA502F36F53B00C3CD00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1754FB202F370E9B00C3CD00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1754FA412F36F53A00C3CD00 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1754FA4E2F36F53B00C3CD00 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1754FB1E2F370E9B00C3CD00 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1754FA542F36F53B00C3CD00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1754FA442F36F53A00C3CD00 /* HomeKitMCP */;
+			targetProxy = 1754FA532F36F53B00C3CD00 /* PBXContainerItemProxy */;
+		};
+		1754FB352F37120000C3CD00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1754FB212F370E9B00C3CD00 /* StatusBarPlugin */;
+			targetProxy = 1754FB322F37120000C3CD00 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1754FA642F36F53B00C3CD00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 17F0A0012F3A000000C3CD00 /* Local.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		1754FA652F36F53B00C3CD00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 17F0A0012F3A000000C3CD00 /* Local.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		1754FA672F36F53B00C3CD00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HomeKitMCP/HomeKitMCP.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHomeKitUsageDescription = "HomeKit MCP needs access to your HomeKit devices to control them via MCP.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = grahamaloo.HomeKitMCP;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,6";
+			};
+			name = Debug;
+		};
+		1754FA682F36F53B00C3CD00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HomeKitMCP/HomeKitMCP.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSUIElement = YES;
+				INFOPLIST_KEY_NSHomeKitUsageDescription = "HomeKit MCP needs access to your HomeKit devices to control them via MCP.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = grahamaloo.HomeKitMCP;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,6";
+			};
+			name = Release;
+		};
+		1754FA6A2F36F53B00C3CD00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = grahamaloo.HomeKitMCPTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HomeKitMCP.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HomeKitMCP";
+			};
+			name = Debug;
+		};
+		1754FA6B2F36F53B00C3CD00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = grahamaloo.HomeKitMCPTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/HomeKitMCP.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/HomeKitMCP";
+			};
+			name = Release;
+		};
+		1754FB232F370E9B00C3CD00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = StatusBarController;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = grahamaloo.StatusBarPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		1754FB242F370E9B00C3CD00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = StatusBarController;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = grahamaloo.StatusBarPlugin;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1754FA402F36F53A00C3CD00 /* Build configuration list for PBXProject "HomeKitMCP" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1754FA642F36F53B00C3CD00 /* Debug */,
+				1754FA652F36F53B00C3CD00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1754FA662F36F53B00C3CD00 /* Build configuration list for PBXNativeTarget "HomeKitMCP" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1754FA672F36F53B00C3CD00 /* Debug */,
+				1754FA682F36F53B00C3CD00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1754FA692F36F53B00C3CD00 /* Build configuration list for PBXNativeTarget "HomeKitMCPTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1754FA6A2F36F53B00C3CD00 /* Debug */,
+				1754FA6B2F36F53B00C3CD00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1754FB252F370E9B00C3CD00 /* Build configuration list for PBXNativeTarget "StatusBarPlugin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1754FB232F370E9B00C3CD00 /* Debug */,
+				1754FB242F370E9B00C3CD00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1754FA7C2F36FA4E00C3CD00 /* XCRemoteSwiftPackageReference "swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/modelcontextprotocol/swift-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.10.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1754FA7D2F36FA5000C3CD00 /* MCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1754FA7C2F36FA4E00C3CD00 /* XCRemoteSwiftPackageReference "swift-sdk" */;
+			productName = MCP;
+		};
+		1754FA802F36FA5100C3CD00 /* MCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1754FA7C2F36FA4E00C3CD00 /* XCRemoteSwiftPackageReference "swift-sdk" */;
+			productName = MCP;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 1754FA3D2F36F53A00C3CD00 /* Project object */;
+}

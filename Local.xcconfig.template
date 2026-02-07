@@ -1,0 +1,11 @@
+// Local build settings — not checked into git.
+// Copy this file to Local.xcconfig and fill in your Apple Development Team ID.
+//
+// You can find your Team ID in Xcode:
+//   1. Open Xcode → Settings → Accounts
+//   2. Select your Apple ID → your team
+//   3. The Team ID is shown in the detail panel
+//
+// Or at https://developer.apple.com/account → Membership Details
+
+DEVELOPMENT_TEAM = YOUR_TEAM_ID_HERE

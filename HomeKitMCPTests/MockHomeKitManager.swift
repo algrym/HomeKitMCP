@@ -29,6 +29,9 @@ final class MockHomeKitManager: HomeKitProviding {
     var stubbedRenameAccessoryResult: [String: Any] = [:]
     var stubbedRemoveAccessoryResult: [String: Any] = [:]
     var stubbedIdentifyAccessoryResult: [String: Any] = [:]
+    var stubbedAddSceneResult: [String: Any] = [:]
+    var stubbedRenameSceneResult: [String: Any] = [:]
+    var stubbedRemoveSceneResult: [String: Any] = [:]
 
     // MARK: - Error stubs
 
@@ -47,6 +50,9 @@ final class MockHomeKitManager: HomeKitProviding {
     var renameAccessoryError: Error?
     var removeAccessoryError: Error?
     var identifyAccessoryError: Error?
+    var addSceneError: Error?
+    var renameSceneError: Error?
+    var removeSceneError: Error?
 
     // MARK: - Call recording
 
@@ -74,6 +80,9 @@ final class MockHomeKitManager: HomeKitProviding {
     var renameAccessoryCalledWith: (id: String?, name: String?, homeName: String?, roomName: String?, newName: String)?
     var removeAccessoryCalledWith: (id: String?, name: String?, homeName: String?, roomName: String?, confirm: Bool)?
     var identifyAccessoryCalledWith: (id: String?, name: String?, homeName: String?, roomName: String?)?
+    var addSceneCalledWith: (homeName: String?, name: String)?
+    var renameSceneCalledWith: (homeName: String?, name: String?, id: String?, newName: String)?
+    var removeSceneCalledWith: (homeName: String?, name: String?, id: String?)?
 
     // MARK: - Protocol conformance
 
@@ -222,5 +231,23 @@ final class MockHomeKitManager: HomeKitProviding {
         identifyAccessoryCalledWith = (id, name, homeName, roomName)
         if let error = identifyAccessoryError { throw error }
         return stubbedIdentifyAccessoryResult
+    }
+
+    func addScene(homeName: String?, name: String) async throws -> [String: Any] {
+        addSceneCalledWith = (homeName, name)
+        if let error = addSceneError { throw error }
+        return stubbedAddSceneResult
+    }
+
+    func renameScene(homeName: String?, name: String?, id: String?, newName: String) async throws -> [String: Any] {
+        renameSceneCalledWith = (homeName, name, id, newName)
+        if let error = renameSceneError { throw error }
+        return stubbedRenameSceneResult
+    }
+
+    func removeScene(homeName: String?, name: String?, id: String?) async throws -> [String: Any] {
+        removeSceneCalledWith = (homeName, name, id)
+        if let error = removeSceneError { throw error }
+        return stubbedRemoveSceneResult
     }
 }

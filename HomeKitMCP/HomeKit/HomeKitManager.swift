@@ -548,6 +548,42 @@ final class HomeKitManager: NSObject {
         return ["success": true, "accessory": accessory.name] as [String: Any]
     }
 
+    // MARK: - Scene Management (write/delete)
+
+    func addScene(homeName: String?, name: String) async throws -> [String: Any] {
+        let home = try resolveHome(name: homeName)
+        let actionSet = try await home.addActionSet(named: name)
+        return [
+            "success": true,
+            "name": actionSet.name,
+            "home": home.name,
+            "uniqueIdentifier": actionSet.uniqueIdentifier.uuidString,
+        ] as [String: Any]
+    }
+
+    func renameScene(homeName: String?, name: String?, id: String?, newName: String) async throws -> [String: Any] {
+        guard let actionSet = resolveActionSet(name: name, homeName: homeName, id: id) else {
+            throw HomeKitError.sceneNotFound(id ?? name ?? "unknown")
+        }
+        let oldName = actionSet.name
+        let foundHomeName = homeForActionSet(actionSet)?.name ?? "unknown"
+        try await actionSet.updateName(newName)
+        return ["success": true, "oldName": oldName, "newName": newName, "home": foundHomeName] as [String: Any]
+    }
+
+    func removeScene(homeName: String?, name: String?, id: String?) async throws -> [String: Any] {
+        guard let actionSet = resolveActionSet(name: name, homeName: homeName, id: id) else {
+            throw HomeKitError.sceneNotFound(id ?? name ?? "unknown")
+        }
+        guard let home = homeForActionSet(actionSet) else {
+            throw HomeKitError.sceneNotFound(id ?? name ?? "unknown")
+        }
+        let sceneName = actionSet.name
+        let foundHomeName = home.name
+        try await home.removeActionSet(actionSet)
+        return ["success": true, "scene": sceneName, "home": foundHomeName] as [String: Any]
+    }
+
     // MARK: - Private: Scene Helpers
 
     private func resolveActionSet(name: String?, homeName: String?, id: String?) -> HMActionSet? {

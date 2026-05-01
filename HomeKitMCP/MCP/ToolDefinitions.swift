@@ -591,6 +591,74 @@ enum ToolDefinitions {
         ])
     )
 
+    static let addScene = Tool(
+        name: "add_scene",
+        description: "Create a new (empty) scene in a HomeKit home.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "name": .object([
+                    "type": .string("string"),
+                    "description": .string("Name for the new scene"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("name")]),
+        ])
+    )
+
+    static let renameScene = Tool(
+        name: "rename_scene",
+        description: "Rename an existing HomeKit scene. Specify by name or unique ID (from list_scenes).",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "id": .object([
+                    "type": .string("string"),
+                    "description": .string("Scene unique identifier (from list_scenes). Preferred over name."),
+                ]),
+                "name": .object([
+                    "type": .string("string"),
+                    "description": .string("Scene name (case-insensitive). Required if id is not provided."),
+                ]),
+                "newName": .object([
+                    "type": .string("string"),
+                    "description": .string("New name for the scene"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name to disambiguate"),
+                ]),
+            ]),
+            "required": .array([.string("newName")]),
+        ])
+    )
+
+    static let removeScene = Tool(
+        name: "remove_scene",
+        description: "Delete a HomeKit scene. Specify by name or unique ID (from list_scenes).",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "id": .object([
+                    "type": .string("string"),
+                    "description": .string("Scene unique identifier (from list_scenes). Preferred over name."),
+                ]),
+                "name": .object([
+                    "type": .string("string"),
+                    "description": .string("Scene name (case-insensitive). Required if id is not provided."),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name to disambiguate"),
+                ]),
+            ]),
+        ])
+    )
+
     static let all: [Tool] = [
         listHomes, listRooms, listDevices, getDeviceState, controlDevice,
         batchControlDevices, batchGetDeviceState, controlDevicesByFilter,
@@ -598,5 +666,6 @@ enum ToolDefinitions {
         addRoom, renameRoom, removeRoom, moveAccessoryToRoom,
         listZones, addZone, renameZone, removeZone, addRoomToZone, removeRoomFromZone,
         renameAccessory, removeAccessory, identifyAccessory,
+        addScene, renameScene, removeScene,
     ]
 }

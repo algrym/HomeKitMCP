@@ -476,4 +476,108 @@ struct HomeKitManagementTests {
         let result = await manager.handleToolCall(params)
         #expect(result.isError == true)
     }
+
+    // MARK: - add_scene
+
+    @Test func addSceneRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedAddSceneResult = [
+            "success": true, "name": "Movie Time", "home": "My Home", "uniqueIdentifier": "ABC-123",
+        ]
+        let params = CallTool.Parameters(
+            name: "add_scene",
+            arguments: ["name": .string("Movie Time"), "home": .string("My Home")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.addSceneCalledWith?.name == "Movie Time")
+        #expect(mock.addSceneCalledWith?.homeName == "My Home")
+        #expect(result.isError != true)
+    }
+
+    @Test func addSceneMissingNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "add_scene", arguments: [:])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    // MARK: - rename_scene
+
+    @Test func renameSceneByNameRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRenameSceneResult = ["success": true, "oldName": "Movie", "newName": "Movie Time", "home": "My Home"]
+
+        let params = CallTool.Parameters(
+            name: "rename_scene",
+            arguments: ["name": .string("Movie"), "newName": .string("Movie Time")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.renameSceneCalledWith?.name == "Movie")
+        #expect(mock.renameSceneCalledWith?.newName == "Movie Time")
+        #expect(result.isError != true)
+    }
+
+    @Test func renameSceneByIdRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRenameSceneResult = ["success": true, "oldName": "Movie", "newName": "Movie Time", "home": "My Home"]
+
+        let params = CallTool.Parameters(
+            name: "rename_scene",
+            arguments: ["id": .string("ABCD-1234"), "newName": .string("Movie Time")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.renameSceneCalledWith?.id == "ABCD-1234")
+        #expect(result.isError != true)
+    }
+
+    @Test func renameSceneMissingIdAndNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "rename_scene", arguments: ["newName": .string("Movie Time")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func renameSceneMissingNewNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "rename_scene", arguments: ["name": .string("Movie")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func renameSceneNotFoundPropagates() async {
+        let (manager, mock) = makeSUT()
+        mock.renameSceneError = HomeKitError.sceneNotFound("Ghost Scene")
+        let params = CallTool.Parameters(
+            name: "rename_scene",
+            arguments: ["name": .string("Ghost Scene"), "newName": .string("Real Scene")]
+        )
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    // MARK: - remove_scene
+
+    @Test func removeSceneByNameRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRemoveSceneResult = ["success": true, "scene": "Movie Time", "home": "My Home"]
+
+        let params = CallTool.Parameters(
+            name: "remove_scene",
+            arguments: ["name": .string("Movie Time")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.removeSceneCalledWith?.name == "Movie Time")
+        #expect(result.isError != true)
+    }
+
+    @Test func removeSceneMissingIdAndNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "remove_scene", arguments: [:])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
 }

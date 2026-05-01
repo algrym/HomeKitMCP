@@ -26,4 +26,7 @@ protocol HomeKitProviding {
     func renameAccessory(id: String?, name: String?, homeName: String?, roomName: String?, newName: String) async throws -> [String: Any]
     func removeAccessory(id: String?, name: String?, homeName: String?, roomName: String?, confirm: Bool) async throws -> [String: Any]
     func identifyAccessory(id: String?, name: String?, homeName: String?, roomName: String?) async throws -> [String: Any]
+    func addScene(homeName: String?, name: String) async throws -> [String: Any]
+    func renameScene(homeName: String?, name: String?, id: String?, newName: String) async throws -> [String: Any]
+    func removeScene(homeName: String?, name: String?, id: String?) async throws -> [String: Any]
 }

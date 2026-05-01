@@ -327,6 +327,34 @@ final class MCPServerManager: ObservableObject {
                 let room = args["room"]?.stringValue
                 result = try await homeKitManager.identifyAccessory(id: id, name: name, homeName: home, roomName: room)
 
+            case "add_scene":
+                guard let name = args["name"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: name")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.addScene(homeName: home, name: name)
+
+            case "rename_scene":
+                let id = args["id"]?.stringValue
+                let name = args["name"]?.stringValue
+                guard id != nil || name != nil else {
+                    return CallTool.Result(content: [.text("Either 'id' or 'name' is required")], isError: true)
+                }
+                guard let newName = args["newName"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: newName")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.renameScene(homeName: home, name: name, id: id, newName: newName)
+
+            case "remove_scene":
+                let id = args["id"]?.stringValue
+                let name = args["name"]?.stringValue
+                guard id != nil || name != nil else {
+                    return CallTool.Result(content: [.text("Either 'id' or 'name' is required")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.removeScene(homeName: home, name: name, id: id)
+
             default:
                 return CallTool.Result(
                     content: [.text("Unknown tool: \(params.name)")],

@@ -383,10 +383,132 @@ enum ToolDefinitions {
         ])
     )
 
+    static let listZones = Tool(
+        name: "list_zones",
+        description: "List HomeKit zones (groups of rooms), optionally filtered by home.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name to filter by. Omit to list zones from all homes."),
+                ]),
+            ]),
+        ])
+    )
+
+    static let addZone = Tool(
+        name: "add_zone",
+        description: "Create a new zone in a HomeKit home. Zones group rooms together (e.g. 'Upstairs').",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "name": .object([
+                    "type": .string("string"),
+                    "description": .string("Name for the new zone"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("name")]),
+        ])
+    )
+
+    static let renameZone = Tool(
+        name: "rename_zone",
+        description: "Rename an existing zone in a HomeKit home.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "zone": .object([
+                    "type": .string("string"),
+                    "description": .string("Current zone name (case-insensitive)"),
+                ]),
+                "newName": .object([
+                    "type": .string("string"),
+                    "description": .string("New name for the zone"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("zone"), .string("newName")]),
+        ])
+    )
+
+    static let removeZone = Tool(
+        name: "remove_zone",
+        description: "Delete a zone from a HomeKit home. Rooms and accessories are not affected.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "zone": .object([
+                    "type": .string("string"),
+                    "description": .string("Zone name to remove (case-insensitive)"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("zone")]),
+        ])
+    )
+
+    static let addRoomToZone = Tool(
+        name: "add_room_to_zone",
+        description: "Add an existing room to a zone.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "zone": .object([
+                    "type": .string("string"),
+                    "description": .string("Zone name (case-insensitive)"),
+                ]),
+                "room": .object([
+                    "type": .string("string"),
+                    "description": .string("Room name to add to the zone (case-insensitive)"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("zone"), .string("room")]),
+        ])
+    )
+
+    static let removeRoomFromZone = Tool(
+        name: "remove_room_from_zone",
+        description: "Remove a room from a zone. The room itself is not deleted.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "zone": .object([
+                    "type": .string("string"),
+                    "description": .string("Zone name (case-insensitive)"),
+                ]),
+                "room": .object([
+                    "type": .string("string"),
+                    "description": .string("Room name to remove from the zone (case-insensitive)"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("zone"), .string("room")]),
+        ])
+    )
+
     static let all: [Tool] = [
         listHomes, listRooms, listDevices, getDeviceState, controlDevice,
         batchControlDevices, batchGetDeviceState, controlDevicesByFilter,
         listScenes, executeScene,
         addRoom, renameRoom, removeRoom, moveAccessoryToRoom,
+        listZones, addZone, renameZone, removeZone, addRoomToZone, removeRoomFromZone,
     ]
 }

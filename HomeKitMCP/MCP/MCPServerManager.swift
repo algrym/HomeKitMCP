@@ -245,6 +245,54 @@ final class MCPServerManager: ObservableObject {
                 let home = args["home"]?.stringValue
                 result = try await homeKitManager.moveAccessoryToRoom(id: id, name: name, homeName: home, roomName: room)
 
+            case "list_zones":
+                let home = args["home"]?.stringValue
+                result = homeKitManager.listZones(homeName: home)
+
+            case "add_zone":
+                guard let name = args["name"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: name")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.addZone(homeName: home, name: name)
+
+            case "rename_zone":
+                guard let zone = args["zone"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: zone")], isError: true)
+                }
+                guard let newName = args["newName"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: newName")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.renameZone(homeName: home, zoneName: zone, newName: newName)
+
+            case "remove_zone":
+                guard let zone = args["zone"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: zone")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.removeZone(homeName: home, zoneName: zone)
+
+            case "add_room_to_zone":
+                guard let zone = args["zone"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: zone")], isError: true)
+                }
+                guard let room = args["room"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: room")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.addRoomToZone(homeName: home, zoneName: zone, roomName: room)
+
+            case "remove_room_from_zone":
+                guard let zone = args["zone"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: zone")], isError: true)
+                }
+                guard let room = args["room"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: room")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.removeRoomFromZone(homeName: home, zoneName: zone, roomName: room)
+
             default:
                 return CallTool.Result(
                     content: [.text("Unknown tool: \(params.name)")],

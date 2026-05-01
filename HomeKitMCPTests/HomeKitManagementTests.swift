@@ -174,4 +174,175 @@ struct HomeKitManagementTests {
         let result = await manager.handleToolCall(params)
         #expect(result.isError == true)
     }
+
+    // MARK: - list_zones
+
+    @Test func listZonesRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedZones = [["name": "Upstairs", "home": "My Home", "rooms": ["Bedroom", "Office"], "uniqueIdentifier": "ABC"]]
+
+        let params = CallTool.Parameters(name: "list_zones", arguments: ["home": .string("My Home")])
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.listZonesCalledWith == .some("My Home"))
+        #expect(result.isError != true)
+    }
+
+    @Test func listZonesPassesNilWhenNoHome() async {
+        let (manager, mock) = makeSUT()
+        let params = CallTool.Parameters(name: "list_zones", arguments: [:])
+        _ = await manager.handleToolCall(params)
+        #expect(mock.listZonesCalledWith == .some(nil))
+    }
+
+    // MARK: - add_zone
+
+    @Test func addZoneRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedAddZoneResult = ["success": true, "name": "Upstairs", "home": "My Home"]
+
+        let params = CallTool.Parameters(
+            name: "add_zone",
+            arguments: ["name": .string("Upstairs"), "home": .string("My Home")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.addZoneCalledWith?.name == "Upstairs")
+        #expect(mock.addZoneCalledWith?.homeName == "My Home")
+        #expect(result.isError != true)
+    }
+
+    @Test func addZoneMissingNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "add_zone", arguments: [:])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    // MARK: - rename_zone
+
+    @Test func renameZoneRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRenameZoneResult = ["success": true, "oldName": "Upstairs", "newName": "Upper Floor", "home": "My Home"]
+
+        let params = CallTool.Parameters(
+            name: "rename_zone",
+            arguments: ["zone": .string("Upstairs"), "newName": .string("Upper Floor")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.renameZoneCalledWith?.zoneName == "Upstairs")
+        #expect(mock.renameZoneCalledWith?.newName == "Upper Floor")
+        #expect(result.isError != true)
+    }
+
+    @Test func renameZoneMissingZoneReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "rename_zone", arguments: ["newName": .string("Upper Floor")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func renameZoneMissingNewNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "rename_zone", arguments: ["zone": .string("Upstairs")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func renameZoneNotFoundPropagates() async {
+        let (manager, mock) = makeSUT()
+        mock.renameZoneError = HomeKitError.zoneNotFound("Ghost Zone")
+        let params = CallTool.Parameters(
+            name: "rename_zone",
+            arguments: ["zone": .string("Ghost Zone"), "newName": .string("Real Zone")]
+        )
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("Ghost Zone"))
+        }
+    }
+
+    // MARK: - remove_zone
+
+    @Test func removeZoneRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRemoveZoneResult = ["success": true, "zone": "Upstairs", "home": "My Home"]
+
+        let params = CallTool.Parameters(name: "remove_zone", arguments: ["zone": .string("Upstairs")])
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.removeZoneCalledWith?.zoneName == "Upstairs")
+        #expect(result.isError != true)
+    }
+
+    @Test func removeZoneMissingZoneReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "remove_zone", arguments: [:])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    // MARK: - add_room_to_zone
+
+    @Test func addRoomToZoneRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedAddRoomToZoneResult = ["success": true, "zone": "Upstairs", "room": "Bedroom", "home": "My Home"]
+
+        let params = CallTool.Parameters(
+            name: "add_room_to_zone",
+            arguments: ["zone": .string("Upstairs"), "room": .string("Bedroom")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.addRoomToZoneCalledWith?.zoneName == "Upstairs")
+        #expect(mock.addRoomToZoneCalledWith?.roomName == "Bedroom")
+        #expect(result.isError != true)
+    }
+
+    @Test func addRoomToZoneMissingZoneReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "add_room_to_zone", arguments: ["room": .string("Bedroom")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func addRoomToZoneMissingRoomReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "add_room_to_zone", arguments: ["zone": .string("Upstairs")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    // MARK: - remove_room_from_zone
+
+    @Test func removeRoomFromZoneRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRemoveRoomFromZoneResult = ["success": true, "zone": "Upstairs", "room": "Bedroom", "home": "My Home"]
+
+        let params = CallTool.Parameters(
+            name: "remove_room_from_zone",
+            arguments: ["zone": .string("Upstairs"), "room": .string("Bedroom")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.removeRoomFromZoneCalledWith?.zoneName == "Upstairs")
+        #expect(mock.removeRoomFromZoneCalledWith?.roomName == "Bedroom")
+        #expect(result.isError != true)
+    }
+
+    @Test func removeRoomFromZoneMissingZoneReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "remove_room_from_zone", arguments: ["room": .string("Bedroom")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func removeRoomFromZoneMissingRoomReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "remove_room_from_zone", arguments: ["zone": .string("Upstairs")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
 }

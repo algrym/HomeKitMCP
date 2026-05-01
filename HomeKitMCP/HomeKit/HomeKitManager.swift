@@ -421,6 +421,82 @@ final class HomeKitManager: NSObject {
         ] as [String: Any]
     }
 
+    // MARK: - Zone Management
+
+    func listZones(homeName: String?) -> [[String: Any]] {
+        let homes = matchingHomes(name: homeName)
+        return homes.flatMap { home in
+            home.zones.map { zone in
+                [
+                    "name": zone.name,
+                    "home": home.name,
+                    "rooms": zone.rooms.map { $0.name },
+                    "uniqueIdentifier": zone.uniqueIdentifier.uuidString,
+                ] as [String: Any]
+            }
+        }
+    }
+
+    func addZone(homeName: String?, name: String) async throws -> [String: Any] {
+        let home = try resolveHome(name: homeName)
+        let zone = try await home.addZone(named: name)
+        return ["success": true, "name": zone.name, "home": home.name] as [String: Any]
+    }
+
+    func renameZone(homeName: String?, zoneName: String, newName: String) async throws -> [String: Any] {
+        let home = try resolveHome(name: homeName)
+        guard let zone = home.zones.first(where: {
+            $0.name.localizedCaseInsensitiveCompare(zoneName) == .orderedSame
+        }) else {
+            throw HomeKitError.zoneNotFound(zoneName)
+        }
+        try await zone.updateName(newName)
+        return ["success": true, "oldName": zoneName, "newName": newName, "home": home.name] as [String: Any]
+    }
+
+    func removeZone(homeName: String?, zoneName: String) async throws -> [String: Any] {
+        let home = try resolveHome(name: homeName)
+        guard let zone = home.zones.first(where: {
+            $0.name.localizedCaseInsensitiveCompare(zoneName) == .orderedSame
+        }) else {
+            throw HomeKitError.zoneNotFound(zoneName)
+        }
+        try await home.removeZone(zone)
+        return ["success": true, "zone": zoneName, "home": home.name] as [String: Any]
+    }
+
+    func addRoomToZone(homeName: String?, zoneName: String, roomName: String) async throws -> [String: Any] {
+        let home = try resolveHome(name: homeName)
+        guard let zone = home.zones.first(where: {
+            $0.name.localizedCaseInsensitiveCompare(zoneName) == .orderedSame
+        }) else {
+            throw HomeKitError.zoneNotFound(zoneName)
+        }
+        guard let room = home.rooms.first(where: {
+            $0.name.localizedCaseInsensitiveCompare(roomName) == .orderedSame
+        }) else {
+            throw HomeKitError.roomNotFound(roomName)
+        }
+        try await zone.addRoom(room)
+        return ["success": true, "zone": zone.name, "room": room.name, "home": home.name] as [String: Any]
+    }
+
+    func removeRoomFromZone(homeName: String?, zoneName: String, roomName: String) async throws -> [String: Any] {
+        let home = try resolveHome(name: homeName)
+        guard let zone = home.zones.first(where: {
+            $0.name.localizedCaseInsensitiveCompare(zoneName) == .orderedSame
+        }) else {
+            throw HomeKitError.zoneNotFound(zoneName)
+        }
+        guard let room = home.rooms.first(where: {
+            $0.name.localizedCaseInsensitiveCompare(roomName) == .orderedSame
+        }) else {
+            throw HomeKitError.roomNotFound(roomName)
+        }
+        try await zone.removeRoom(room)
+        return ["success": true, "zone": zone.name, "room": room.name, "home": home.name] as [String: Any]
+    }
+
     // MARK: - Private: Scene Helpers
 
     private func resolveActionSet(name: String?, homeName: String?, id: String?) -> HMActionSet? {

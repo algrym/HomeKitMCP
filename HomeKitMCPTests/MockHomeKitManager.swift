@@ -20,6 +20,12 @@ final class MockHomeKitManager: HomeKitProviding {
     var stubbedRenameRoomResult: [String: Any] = [:]
     var stubbedRemoveRoomResult: [String: Any] = [:]
     var stubbedMoveAccessoryToRoomResult: [String: Any] = [:]
+    var stubbedZones: [[String: Any]] = []
+    var stubbedAddZoneResult: [String: Any] = [:]
+    var stubbedRenameZoneResult: [String: Any] = [:]
+    var stubbedRemoveZoneResult: [String: Any] = [:]
+    var stubbedAddRoomToZoneResult: [String: Any] = [:]
+    var stubbedRemoveRoomFromZoneResult: [String: Any] = [:]
 
     // MARK: - Error stubs
 
@@ -30,6 +36,11 @@ final class MockHomeKitManager: HomeKitProviding {
     var renameRoomError: Error?
     var removeRoomError: Error?
     var moveAccessoryToRoomError: Error?
+    var addZoneError: Error?
+    var renameZoneError: Error?
+    var removeZoneError: Error?
+    var addRoomToZoneError: Error?
+    var removeRoomFromZoneError: Error?
 
     // MARK: - Call recording
 
@@ -48,6 +59,12 @@ final class MockHomeKitManager: HomeKitProviding {
     var renameRoomCalledWith: (homeName: String?, roomName: String, newName: String)?
     var removeRoomCalledWith: (homeName: String?, roomName: String)?
     var moveAccessoryToRoomCalledWith: (id: String?, name: String?, homeName: String?, roomName: String)?
+    var listZonesCalledWith: String??
+    var addZoneCalledWith: (homeName: String?, name: String)?
+    var renameZoneCalledWith: (homeName: String?, zoneName: String, newName: String)?
+    var removeZoneCalledWith: (homeName: String?, zoneName: String)?
+    var addRoomToZoneCalledWith: (homeName: String?, zoneName: String, roomName: String)?
+    var removeRoomFromZoneCalledWith: (homeName: String?, zoneName: String, roomName: String)?
 
     // MARK: - Protocol conformance
 
@@ -143,5 +160,40 @@ final class MockHomeKitManager: HomeKitProviding {
         moveAccessoryToRoomCalledWith = (id, name, homeName, roomName)
         if let error = moveAccessoryToRoomError { throw error }
         return stubbedMoveAccessoryToRoomResult
+    }
+
+    func listZones(homeName: String?) -> [[String: Any]] {
+        listZonesCalledWith = .some(homeName)
+        return stubbedZones
+    }
+
+    func addZone(homeName: String?, name: String) async throws -> [String: Any] {
+        addZoneCalledWith = (homeName, name)
+        if let error = addZoneError { throw error }
+        return stubbedAddZoneResult
+    }
+
+    func renameZone(homeName: String?, zoneName: String, newName: String) async throws -> [String: Any] {
+        renameZoneCalledWith = (homeName, zoneName, newName)
+        if let error = renameZoneError { throw error }
+        return stubbedRenameZoneResult
+    }
+
+    func removeZone(homeName: String?, zoneName: String) async throws -> [String: Any] {
+        removeZoneCalledWith = (homeName, zoneName)
+        if let error = removeZoneError { throw error }
+        return stubbedRemoveZoneResult
+    }
+
+    func addRoomToZone(homeName: String?, zoneName: String, roomName: String) async throws -> [String: Any] {
+        addRoomToZoneCalledWith = (homeName, zoneName, roomName)
+        if let error = addRoomToZoneError { throw error }
+        return stubbedAddRoomToZoneResult
+    }
+
+    func removeRoomFromZone(homeName: String?, zoneName: String, roomName: String) async throws -> [String: Any] {
+        removeRoomFromZoneCalledWith = (homeName, zoneName, roomName)
+        if let error = removeRoomFromZoneError { throw error }
+        return stubbedRemoveRoomFromZoneResult
     }
 }

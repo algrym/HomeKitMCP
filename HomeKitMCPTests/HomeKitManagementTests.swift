@@ -345,4 +345,135 @@ struct HomeKitManagementTests {
         let result = await manager.handleToolCall(params)
         #expect(result.isError == true)
     }
+
+    // MARK: - rename_accessory
+
+    @Test func renameAccessoryRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRenameAccessoryResult = ["success": true, "oldName": "Lamp 3", "newName": "Desk Lamp"]
+
+        let params = CallTool.Parameters(
+            name: "rename_accessory",
+            arguments: ["name": .string("Lamp 3"), "newName": .string("Desk Lamp")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.renameAccessoryCalledWith?.name == "Lamp 3")
+        #expect(mock.renameAccessoryCalledWith?.newName == "Desk Lamp")
+        #expect(result.isError != true)
+    }
+
+    @Test func renameAccessoryByIdRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRenameAccessoryResult = ["success": true, "oldName": "Lamp 3", "newName": "Desk Lamp"]
+
+        let params = CallTool.Parameters(
+            name: "rename_accessory",
+            arguments: ["id": .string("ABCD-1234"), "newName": .string("Desk Lamp")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.renameAccessoryCalledWith?.id == "ABCD-1234")
+        #expect(result.isError != true)
+    }
+
+    @Test func renameAccessoryMissingIdAndNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "rename_accessory", arguments: ["newName": .string("Desk Lamp")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func renameAccessoryMissingNewNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "rename_accessory", arguments: ["name": .string("Lamp 3")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func renameAccessoryNotFoundPropagates() async {
+        let (manager, mock) = makeSUT()
+        mock.renameAccessoryError = HomeKitError.deviceNotFound("Ghost Lamp")
+        let params = CallTool.Parameters(
+            name: "rename_accessory",
+            arguments: ["name": .string("Ghost Lamp"), "newName": .string("Real Lamp")]
+        )
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    // MARK: - remove_accessory
+
+    @Test func removeAccessoryWithConfirmRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRemoveAccessoryResult = ["success": true, "accessory": "Old Lamp", "home": "My Home"]
+
+        let params = CallTool.Parameters(
+            name: "remove_accessory",
+            arguments: ["name": .string("Old Lamp"), "confirm": .bool(true)]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.removeAccessoryCalledWith?.name == "Old Lamp")
+        #expect(mock.removeAccessoryCalledWith?.confirm == true)
+        #expect(result.isError != true)
+    }
+
+    @Test func removeAccessoryWithoutConfirmPassesFalse() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRemoveAccessoryResult = [
+            "success": false,
+            "requiresConfirmation": true,
+            "message": "Pass confirm: true to proceed.",
+        ]
+        let params = CallTool.Parameters(
+            name: "remove_accessory",
+            arguments: ["name": .string("Old Lamp")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.removeAccessoryCalledWith?.confirm == false)
+        #expect(result.isError != true)
+    }
+
+    @Test func removeAccessoryMissingIdAndNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "remove_accessory", arguments: ["confirm": .bool(true)])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    // MARK: - identify_accessory
+
+    @Test func identifyAccessoryRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedIdentifyAccessoryResult = ["success": true, "accessory": "Lamp 3"]
+
+        let params = CallTool.Parameters(
+            name: "identify_accessory",
+            arguments: ["name": .string("Lamp 3")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.identifyAccessoryCalledWith?.name == "Lamp 3")
+        #expect(result.isError != true)
+    }
+
+    @Test func identifyAccessoryMissingIdAndNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "identify_accessory", arguments: [:])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func identifyAccessoryNotFoundPropagates() async {
+        let (manager, mock) = makeSUT()
+        mock.identifyAccessoryError = HomeKitError.deviceNotFound("Ghost")
+        let params = CallTool.Parameters(
+            name: "identify_accessory",
+            arguments: ["name": .string("Ghost")]
+        )
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
 }

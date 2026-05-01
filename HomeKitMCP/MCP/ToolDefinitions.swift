@@ -504,11 +504,99 @@ enum ToolDefinitions {
         ])
     )
 
+    static let renameAccessory = Tool(
+        name: "rename_accessory",
+        description: "Rename a HomeKit accessory. Specify the accessory by name or unique ID (preferred).",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "id": .object([
+                    "type": .string("string"),
+                    "description": .string("Accessory unique identifier (from list_devices). Preferred over name."),
+                ]),
+                "name": .object([
+                    "type": .string("string"),
+                    "description": .string("Accessory name (case-insensitive). Required if id is not provided."),
+                ]),
+                "newName": .object([
+                    "type": .string("string"),
+                    "description": .string("New name for the accessory"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name to disambiguate"),
+                ]),
+                "room": .object([
+                    "type": .string("string"),
+                    "description": .string("Room name to disambiguate"),
+                ]),
+            ]),
+            "required": .array([.string("newName")]),
+        ])
+    )
+
+    static let removeAccessory = Tool(
+        name: "remove_accessory",
+        description: "Permanently unpair a HomeKit accessory. Destructive and hard to reverse. Always ask the user for explicit confirmation before calling this tool. Pass confirm: true only after the user has confirmed.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "id": .object([
+                    "type": .string("string"),
+                    "description": .string("Accessory unique identifier (from list_devices). Preferred over name."),
+                ]),
+                "name": .object([
+                    "type": .string("string"),
+                    "description": .string("Accessory name (case-insensitive). Required if id is not provided."),
+                ]),
+                "confirm": .object([
+                    "type": .string("boolean"),
+                    "description": .string("Must be true to execute. Without this, returns a warning instead of unpairing."),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name to disambiguate"),
+                ]),
+                "room": .object([
+                    "type": .string("string"),
+                    "description": .string("Room name to disambiguate"),
+                ]),
+            ]),
+        ])
+    )
+
+    static let identifyAccessory = Tool(
+        name: "identify_accessory",
+        description: "Trigger the identify action on a HomeKit accessory (typically causes it to blink or beep). Useful when reorganizing to confirm which physical device corresponds to a name.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "id": .object([
+                    "type": .string("string"),
+                    "description": .string("Accessory unique identifier (from list_devices). Preferred over name."),
+                ]),
+                "name": .object([
+                    "type": .string("string"),
+                    "description": .string("Accessory name (case-insensitive). Required if id is not provided."),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name to disambiguate"),
+                ]),
+                "room": .object([
+                    "type": .string("string"),
+                    "description": .string("Room name to disambiguate"),
+                ]),
+            ]),
+        ])
+    )
+
     static let all: [Tool] = [
         listHomes, listRooms, listDevices, getDeviceState, controlDevice,
         batchControlDevices, batchGetDeviceState, controlDevicesByFilter,
         listScenes, executeScene,
         addRoom, renameRoom, removeRoom, moveAccessoryToRoom,
         listZones, addZone, renameZone, removeZone, addRoomToZone, removeRoomFromZone,
+        renameAccessory, removeAccessory, identifyAccessory,
     ]
 }

@@ -293,6 +293,40 @@ final class MCPServerManager: ObservableObject {
                 let home = args["home"]?.stringValue
                 result = try await homeKitManager.removeRoomFromZone(homeName: home, zoneName: zone, roomName: room)
 
+            case "rename_accessory":
+                let id = args["id"]?.stringValue
+                let name = args["name"]?.stringValue
+                guard id != nil || name != nil else {
+                    return CallTool.Result(content: [.text("Either 'id' or 'name' is required")], isError: true)
+                }
+                guard let newName = args["newName"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: newName")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                let room = args["room"]?.stringValue
+                result = try await homeKitManager.renameAccessory(id: id, name: name, homeName: home, roomName: room, newName: newName)
+
+            case "remove_accessory":
+                let id = args["id"]?.stringValue
+                let name = args["name"]?.stringValue
+                guard id != nil || name != nil else {
+                    return CallTool.Result(content: [.text("Either 'id' or 'name' is required")], isError: true)
+                }
+                let confirm = args["confirm"]?.boolValue ?? false
+                let home = args["home"]?.stringValue
+                let room = args["room"]?.stringValue
+                result = try await homeKitManager.removeAccessory(id: id, name: name, homeName: home, roomName: room, confirm: confirm)
+
+            case "identify_accessory":
+                let id = args["id"]?.stringValue
+                let name = args["name"]?.stringValue
+                guard id != nil || name != nil else {
+                    return CallTool.Result(content: [.text("Either 'id' or 'name' is required")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                let room = args["room"]?.stringValue
+                result = try await homeKitManager.identifyAccessory(id: id, name: name, homeName: home, roomName: room)
+
             default:
                 return CallTool.Result(
                     content: [.text("Unknown tool: \(params.name)")],

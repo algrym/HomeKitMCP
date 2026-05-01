@@ -497,6 +497,57 @@ final class HomeKitManager: NSObject {
         return ["success": true, "zone": zone.name, "room": room.name, "home": home.name] as [String: Any]
     }
 
+    // MARK: - Accessory Management
+
+    func renameAccessory(id: String?, name: String?, homeName: String?, roomName: String?, newName: String) async throws -> [String: Any] {
+        guard let accessory = resolveAccessory(id: id, name: name, homeName: homeName, roomName: roomName) else {
+            throw HomeKitError.deviceNotFound(id ?? name ?? "unknown")
+        }
+        let oldName = accessory.name
+        try await accessory.updateName(newName)
+        return ["success": true, "oldName": oldName, "newName": newName] as [String: Any]
+    }
+
+    func removeAccessory(id: String?, name: String?, homeName: String?, roomName: String?, confirm: Bool) async throws -> [String: Any] {
+        guard let accessory = resolveAccessory(id: id, name: name, homeName: homeName, roomName: roomName) else {
+            throw HomeKitError.deviceNotFound(id ?? name ?? "unknown")
+        }
+        guard confirm else {
+            return [
+                "success": false,
+                "requiresConfirmation": true,
+                "message": "This will permanently unpair '\(accessory.name)' from HomeKit. Pass confirm: true to proceed.",
+            ] as [String: Any]
+        }
+        guard let manager = homeManager,
+              let home = manager.homes.first(where: {
+                  $0.accessories.contains(where: { $0.uniqueIdentifier == accessory.uniqueIdentifier })
+              })
+        else {
+            throw HomeKitError.homeNotFound(homeName ?? "unknown")
+        }
+        let accessoryName = accessory.name
+        let foundHomeName = home.name
+        try await home.removeAccessory(accessory)
+        return ["success": true, "accessory": accessoryName, "home": foundHomeName] as [String: Any]
+    }
+
+    func identifyAccessory(id: String?, name: String?, homeName: String?, roomName: String?) async throws -> [String: Any] {
+        guard let accessory = resolveAccessory(id: id, name: name, homeName: homeName, roomName: roomName) else {
+            throw HomeKitError.deviceNotFound(id ?? name ?? "unknown")
+        }
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            accessory.identify { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
+        return ["success": true, "accessory": accessory.name] as [String: Any]
+    }
+
     // MARK: - Private: Scene Helpers
 
     private func resolveActionSet(name: String?, homeName: String?, id: String?) -> HMActionSet? {

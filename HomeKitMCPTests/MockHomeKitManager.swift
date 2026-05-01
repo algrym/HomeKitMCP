@@ -26,6 +26,9 @@ final class MockHomeKitManager: HomeKitProviding {
     var stubbedRemoveZoneResult: [String: Any] = [:]
     var stubbedAddRoomToZoneResult: [String: Any] = [:]
     var stubbedRemoveRoomFromZoneResult: [String: Any] = [:]
+    var stubbedRenameAccessoryResult: [String: Any] = [:]
+    var stubbedRemoveAccessoryResult: [String: Any] = [:]
+    var stubbedIdentifyAccessoryResult: [String: Any] = [:]
 
     // MARK: - Error stubs
 
@@ -41,6 +44,9 @@ final class MockHomeKitManager: HomeKitProviding {
     var removeZoneError: Error?
     var addRoomToZoneError: Error?
     var removeRoomFromZoneError: Error?
+    var renameAccessoryError: Error?
+    var removeAccessoryError: Error?
+    var identifyAccessoryError: Error?
 
     // MARK: - Call recording
 
@@ -65,6 +71,9 @@ final class MockHomeKitManager: HomeKitProviding {
     var removeZoneCalledWith: (homeName: String?, zoneName: String)?
     var addRoomToZoneCalledWith: (homeName: String?, zoneName: String, roomName: String)?
     var removeRoomFromZoneCalledWith: (homeName: String?, zoneName: String, roomName: String)?
+    var renameAccessoryCalledWith: (id: String?, name: String?, homeName: String?, roomName: String?, newName: String)?
+    var removeAccessoryCalledWith: (id: String?, name: String?, homeName: String?, roomName: String?, confirm: Bool)?
+    var identifyAccessoryCalledWith: (id: String?, name: String?, homeName: String?, roomName: String?)?
 
     // MARK: - Protocol conformance
 
@@ -195,5 +204,23 @@ final class MockHomeKitManager: HomeKitProviding {
         removeRoomFromZoneCalledWith = (homeName, zoneName, roomName)
         if let error = removeRoomFromZoneError { throw error }
         return stubbedRemoveRoomFromZoneResult
+    }
+
+    func renameAccessory(id: String?, name: String?, homeName: String?, roomName: String?, newName: String) async throws -> [String: Any] {
+        renameAccessoryCalledWith = (id, name, homeName, roomName, newName)
+        if let error = renameAccessoryError { throw error }
+        return stubbedRenameAccessoryResult
+    }
+
+    func removeAccessory(id: String?, name: String?, homeName: String?, roomName: String?, confirm: Bool) async throws -> [String: Any] {
+        removeAccessoryCalledWith = (id, name, homeName, roomName, confirm)
+        if let error = removeAccessoryError { throw error }
+        return stubbedRemoveAccessoryResult
+    }
+
+    func identifyAccessory(id: String?, name: String?, homeName: String?, roomName: String?) async throws -> [String: Any] {
+        identifyAccessoryCalledWith = (id, name, homeName, roomName)
+        if let error = identifyAccessoryError { throw error }
+        return stubbedIdentifyAccessoryResult
     }
 }

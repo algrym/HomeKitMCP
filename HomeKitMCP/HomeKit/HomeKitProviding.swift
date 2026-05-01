@@ -23,4 +23,7 @@ protocol HomeKitProviding {
     func removeZone(homeName: String?, zoneName: String) async throws -> [String: Any]
     func addRoomToZone(homeName: String?, zoneName: String, roomName: String) async throws -> [String: Any]
     func removeRoomFromZone(homeName: String?, zoneName: String, roomName: String) async throws -> [String: Any]
+    func renameAccessory(id: String?, name: String?, homeName: String?, roomName: String?, newName: String) async throws -> [String: Any]
+    func removeAccessory(id: String?, name: String?, homeName: String?, roomName: String?, confirm: Bool) async throws -> [String: Any]
+    func identifyAccessory(id: String?, name: String?, homeName: String?, roomName: String?) async throws -> [String: Any]
 }

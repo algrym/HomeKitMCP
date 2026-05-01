@@ -32,6 +32,7 @@ final class MockHomeKitManager: HomeKitProviding {
     var stubbedAddSceneResult: [String: Any] = [:]
     var stubbedRenameSceneResult: [String: Any] = [:]
     var stubbedRemoveSceneResult: [String: Any] = [:]
+    var stubbedRenameHomeResult: [String: Any] = [:]
 
     // MARK: - Error stubs
 
@@ -53,6 +54,7 @@ final class MockHomeKitManager: HomeKitProviding {
     var addSceneError: Error?
     var renameSceneError: Error?
     var removeSceneError: Error?
+    var renameHomeError: Error?
 
     // MARK: - Call recording
 
@@ -83,6 +85,7 @@ final class MockHomeKitManager: HomeKitProviding {
     var addSceneCalledWith: (homeName: String?, name: String)?
     var renameSceneCalledWith: (homeName: String?, name: String?, id: String?, newName: String)?
     var removeSceneCalledWith: (homeName: String?, name: String?, id: String?)?
+    var renameHomeCalledWith: (homeName: String, newName: String)?
 
     // MARK: - Protocol conformance
 
@@ -249,5 +252,11 @@ final class MockHomeKitManager: HomeKitProviding {
         removeSceneCalledWith = (homeName, name, id)
         if let error = removeSceneError { throw error }
         return stubbedRemoveSceneResult
+    }
+
+    func renameHome(homeName: String, newName: String) async throws -> [String: Any] {
+        renameHomeCalledWith = (homeName, newName)
+        if let error = renameHomeError { throw error }
+        return stubbedRenameHomeResult
     }
 }

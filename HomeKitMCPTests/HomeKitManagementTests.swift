@@ -580,4 +580,49 @@ struct HomeKitManagementTests {
         let result = await manager.handleToolCall(params)
         #expect(result.isError == true)
     }
+
+    // MARK: - rename_home
+
+    @Test func renameHomeRoutesToManager() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedRenameHomeResult = ["success": true, "oldName": "My Home", "newName": "Casa"]
+
+        let params = CallTool.Parameters(
+            name: "rename_home",
+            arguments: ["home": .string("My Home"), "newName": .string("Casa")]
+        )
+        let result = await manager.handleToolCall(params)
+
+        #expect(mock.renameHomeCalledWith?.homeName == "My Home")
+        #expect(mock.renameHomeCalledWith?.newName == "Casa")
+        #expect(result.isError != true)
+    }
+
+    @Test func renameHomeMissingHomeReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "rename_home", arguments: ["newName": .string("Casa")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func renameHomeMissingNewNameReturnsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "rename_home", arguments: ["home": .string("My Home")])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
+    @Test func renameHomeNotFoundPropagates() async {
+        let (manager, mock) = makeSUT()
+        mock.renameHomeError = HomeKitError.homeNotFound("Ghost Home")
+        let params = CallTool.Parameters(
+            name: "rename_home",
+            arguments: ["home": .string("Ghost Home"), "newName": .string("Casa")]
+        )
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("Ghost Home"))
+        }
+    }
 }

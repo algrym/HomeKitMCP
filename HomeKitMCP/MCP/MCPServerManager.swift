@@ -355,6 +355,15 @@ final class MCPServerManager: ObservableObject {
                 let home = args["home"]?.stringValue
                 result = try await homeKitManager.removeScene(homeName: home, name: name, id: id)
 
+            case "rename_home":
+                guard let home = args["home"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: home")], isError: true)
+                }
+                guard let newName = args["newName"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: newName")], isError: true)
+                }
+                result = try await homeKitManager.renameHome(homeName: home, newName: newName)
+
             default:
                 return CallTool.Result(
                     content: [.text("Unknown tool: \(params.name)")],

@@ -29,4 +29,5 @@ protocol HomeKitProviding {
     func addScene(homeName: String?, name: String) async throws -> [String: Any]
     func renameScene(homeName: String?, name: String?, id: String?, newName: String) async throws -> [String: Any]
     func removeScene(homeName: String?, name: String?, id: String?) async throws -> [String: Any]
+    func renameHome(homeName: String, newName: String) async throws -> [String: Any]
 }

@@ -659,6 +659,25 @@ enum ToolDefinitions {
         ])
     )
 
+    static let renameHome = Tool(
+        name: "rename_home",
+        description: "Rename a HomeKit home.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Current home name (case-insensitive)"),
+                ]),
+                "newName": .object([
+                    "type": .string("string"),
+                    "description": .string("New name for the home"),
+                ]),
+            ]),
+            "required": .array([.string("home"), .string("newName")]),
+        ])
+    )
+
     static let all: [Tool] = [
         listHomes, listRooms, listDevices, getDeviceState, controlDevice,
         batchControlDevices, batchGetDeviceState, controlDevicesByFilter,
@@ -667,5 +686,6 @@ enum ToolDefinitions {
         listZones, addZone, renameZone, removeZone, addRoomToZone, removeRoomFromZone,
         renameAccessory, removeAccessory, identifyAccessory,
         addScene, renameScene, removeScene,
+        renameHome,
     ]
 }

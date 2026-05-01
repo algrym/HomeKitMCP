@@ -584,6 +584,20 @@ final class HomeKitManager: NSObject {
         return ["success": true, "scene": sceneName, "home": foundHomeName] as [String: Any]
     }
 
+    // MARK: - Home Management
+
+    func renameHome(homeName: String, newName: String) async throws -> [String: Any] {
+        guard let manager = homeManager,
+              let home = manager.homes.first(where: {
+                  $0.name.localizedCaseInsensitiveCompare(homeName) == .orderedSame
+              })
+        else {
+            throw HomeKitError.homeNotFound(homeName)
+        }
+        try await home.updateName(newName)
+        return ["success": true, "oldName": homeName, "newName": newName] as [String: Any]
+    }
+
     // MARK: - Private: Scene Helpers
 
     private func resolveActionSet(name: String?, homeName: String?, id: String?) -> HMActionSet? {

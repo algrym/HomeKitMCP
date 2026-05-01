@@ -295,9 +295,98 @@ enum ToolDefinitions {
         ])
     )
 
+    static let addRoom = Tool(
+        name: "add_room",
+        description: "Create a new room in a HomeKit home.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "name": .object([
+                    "type": .string("string"),
+                    "description": .string("Name for the new room"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("name")]),
+        ])
+    )
+
+    static let renameRoom = Tool(
+        name: "rename_room",
+        description: "Rename an existing room in a HomeKit home.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "room": .object([
+                    "type": .string("string"),
+                    "description": .string("Current room name (case-insensitive)"),
+                ]),
+                "newName": .object([
+                    "type": .string("string"),
+                    "description": .string("New name for the room"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("room"), .string("newName")]),
+        ])
+    )
+
+    static let removeRoom = Tool(
+        name: "remove_room",
+        description: "Delete a room from a HomeKit home. Accessories in that room are moved to the Default Room.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "room": .object([
+                    "type": .string("string"),
+                    "description": .string("Room name to remove (case-insensitive)"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("room")]),
+        ])
+    )
+
+    static let moveAccessoryToRoom = Tool(
+        name: "move_accessory_to_room",
+        description: "Move a HomeKit accessory to a different room. Specify the accessory by name or unique ID.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "id": .object([
+                    "type": .string("string"),
+                    "description": .string("Accessory unique identifier (from list_devices). Preferred over name."),
+                ]),
+                "name": .object([
+                    "type": .string("string"),
+                    "description": .string("Accessory name (case-insensitive). Required if id is not provided."),
+                ]),
+                "room": .object([
+                    "type": .string("string"),
+                    "description": .string("Destination room name (case-insensitive)"),
+                ]),
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name. Omit to use the primary home."),
+                ]),
+            ]),
+            "required": .array([.string("room")]),
+        ])
+    )
+
     static let all: [Tool] = [
         listHomes, listRooms, listDevices, getDeviceState, controlDevice,
         batchControlDevices, batchGetDeviceState, controlDevicesByFilter,
         listScenes, executeScene,
+        addRoom, renameRoom, removeRoom, moveAccessoryToRoom,
     ]
 }

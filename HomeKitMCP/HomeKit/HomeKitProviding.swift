@@ -13,4 +13,8 @@ protocol HomeKitProviding {
     func controlDevicesByFilter(homeName: String?, roomName: String?, type: String?, action: String, value: Any?) async -> [[String: Any]]
     func listScenes(homeName: String?) -> [[String: Any]]
     func executeScene(name: String?, homeName: String?, id: String?) async throws -> [String: Any]
+    func addRoom(homeName: String?, name: String) async throws -> [String: Any]
+    func renameRoom(homeName: String?, roomName: String, newName: String) async throws -> [String: Any]
+    func removeRoom(homeName: String?, roomName: String) async throws -> [String: Any]
+    func moveAccessoryToRoom(id: String?, name: String?, homeName: String?, roomName: String) async throws -> [String: Any]
 }

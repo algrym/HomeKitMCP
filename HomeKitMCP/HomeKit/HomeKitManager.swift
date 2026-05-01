@@ -359,6 +359,68 @@ final class HomeKitManager: NSObject {
         ] as [String: Any]
     }
 
+    // MARK: - Room Management
+
+    func addRoom(homeName: String?, name: String) async throws -> [String: Any] {
+        let home = try resolveHome(name: homeName)
+        let room = try await home.addRoom(named: name)
+        return ["success": true, "name": room.name, "home": home.name] as [String: Any]
+    }
+
+    func renameRoom(homeName: String?, roomName: String, newName: String) async throws -> [String: Any] {
+        let home = try resolveHome(name: homeName)
+        guard let room = home.rooms.first(where: {
+            $0.name.localizedCaseInsensitiveCompare(roomName) == .orderedSame
+        }) else {
+            throw HomeKitError.roomNotFound(roomName)
+        }
+        try await room.updateName(newName)
+        return ["success": true, "oldName": roomName, "newName": newName, "home": home.name] as [String: Any]
+    }
+
+    func removeRoom(homeName: String?, roomName: String) async throws -> [String: Any] {
+        let home = try resolveHome(name: homeName)
+        guard let room = home.rooms.first(where: {
+            $0.name.localizedCaseInsensitiveCompare(roomName) == .orderedSame
+        }) else {
+            throw HomeKitError.roomNotFound(roomName)
+        }
+        let movedAccessories = room.accessories.map { $0.name }
+        try await home.removeRoom(room)
+        return [
+            "success": true,
+            "room": roomName,
+            "home": home.name,
+            "movedAccessories": movedAccessories,
+        ] as [String: Any]
+    }
+
+    func moveAccessoryToRoom(id: String?, name: String?, homeName: String?, roomName: String) async throws -> [String: Any] {
+        guard let accessory = resolveAccessory(id: id, name: name, homeName: homeName, roomName: nil) else {
+            throw HomeKitError.deviceNotFound(id ?? name ?? "unknown")
+        }
+        guard let manager = homeManager,
+              let home = manager.homes.first(where: {
+                  $0.accessories.contains(where: { $0.uniqueIdentifier == accessory.uniqueIdentifier })
+              })
+        else {
+            throw HomeKitError.homeNotFound(homeName ?? "unknown")
+        }
+        guard let targetRoom = home.rooms.first(where: {
+            $0.name.localizedCaseInsensitiveCompare(roomName) == .orderedSame
+        }) else {
+            throw HomeKitError.roomNotFound(roomName)
+        }
+        let fromRoom = accessory.room?.name ?? "Default Room"
+        try await home.assignAccessory(accessory, to: targetRoom)
+        return [
+            "success": true,
+            "accessory": accessory.name,
+            "fromRoom": fromRoom,
+            "toRoom": targetRoom.name,
+        ] as [String: Any]
+    }
+
     // MARK: - Private: Scene Helpers
 
     private func resolveActionSet(name: String?, homeName: String?, id: String?) -> HMActionSet? {
@@ -412,6 +474,24 @@ final class HomeKitManager: NSObject {
     }
 
     // MARK: - Private: Lookup Helpers
+
+    private func resolveHome(name: String?) throws -> HMHome {
+        guard let manager = homeManager else {
+            throw HomeKitError.homeNotFound(name ?? "primary")
+        }
+        if let name {
+            guard let home = manager.homes.first(where: {
+                $0.name.localizedCaseInsensitiveCompare(name) == .orderedSame
+            }) else {
+                throw HomeKitError.homeNotFound(name)
+            }
+            return home
+        }
+        guard let home = manager.primaryHome ?? manager.homes.first else {
+            throw HomeKitError.homeNotFound("primary")
+        }
+        return home
+    }
 
     private func matchingHomes(name: String?) -> [HMHome] {
         guard let manager = homeManager else { return [] }

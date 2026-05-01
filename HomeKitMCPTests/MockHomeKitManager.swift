@@ -16,12 +16,20 @@ final class MockHomeKitManager: HomeKitProviding {
     var stubbedControlByFilterResult: [[String: Any]] = []
     var stubbedScenes: [[String: Any]] = []
     var stubbedExecuteSceneResult: [String: Any] = [:]
+    var stubbedAddRoomResult: [String: Any] = [:]
+    var stubbedRenameRoomResult: [String: Any] = [:]
+    var stubbedRemoveRoomResult: [String: Any] = [:]
+    var stubbedMoveAccessoryToRoomResult: [String: Any] = [:]
 
     // MARK: - Error stubs
 
     var getDeviceStateError: Error?
     var controlDeviceError: Error?
     var executeSceneError: Error?
+    var addRoomError: Error?
+    var renameRoomError: Error?
+    var removeRoomError: Error?
+    var moveAccessoryToRoomError: Error?
 
     // MARK: - Call recording
 
@@ -36,6 +44,10 @@ final class MockHomeKitManager: HomeKitProviding {
     var controlDevicesByFilterCalledWith: (homeName: String?, roomName: String?, type: String?, action: String, value: Any?)?
     var listScenesCalledWith: String??
     var executeSceneCalledWith: (name: String?, homeName: String?, id: String?)?
+    var addRoomCalledWith: (homeName: String?, name: String)?
+    var renameRoomCalledWith: (homeName: String?, roomName: String, newName: String)?
+    var removeRoomCalledWith: (homeName: String?, roomName: String)?
+    var moveAccessoryToRoomCalledWith: (id: String?, name: String?, homeName: String?, roomName: String)?
 
     // MARK: - Protocol conformance
 
@@ -107,5 +119,29 @@ final class MockHomeKitManager: HomeKitProviding {
         executeSceneCalledWith = (name, homeName, id)
         if let error = executeSceneError { throw error }
         return stubbedExecuteSceneResult
+    }
+
+    func addRoom(homeName: String?, name: String) async throws -> [String: Any] {
+        addRoomCalledWith = (homeName, name)
+        if let error = addRoomError { throw error }
+        return stubbedAddRoomResult
+    }
+
+    func renameRoom(homeName: String?, roomName: String, newName: String) async throws -> [String: Any] {
+        renameRoomCalledWith = (homeName, roomName, newName)
+        if let error = renameRoomError { throw error }
+        return stubbedRenameRoomResult
+    }
+
+    func removeRoom(homeName: String?, roomName: String) async throws -> [String: Any] {
+        removeRoomCalledWith = (homeName, roomName)
+        if let error = removeRoomError { throw error }
+        return stubbedRemoveRoomResult
+    }
+
+    func moveAccessoryToRoom(id: String?, name: String?, homeName: String?, roomName: String) async throws -> [String: Any] {
+        moveAccessoryToRoomCalledWith = (id, name, homeName, roomName)
+        if let error = moveAccessoryToRoomError { throw error }
+        return stubbedMoveAccessoryToRoomResult
     }
 }

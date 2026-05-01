@@ -209,6 +209,42 @@ final class MCPServerManager: ObservableObject {
                 let home = args["home"]?.stringValue
                 result = try await homeKitManager.executeScene(name: name, homeName: home, id: id)
 
+            case "add_room":
+                guard let name = args["name"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: name")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.addRoom(homeName: home, name: name)
+
+            case "rename_room":
+                guard let room = args["room"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: room")], isError: true)
+                }
+                guard let newName = args["newName"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: newName")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.renameRoom(homeName: home, roomName: room, newName: newName)
+
+            case "remove_room":
+                guard let room = args["room"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: room")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.removeRoom(homeName: home, roomName: room)
+
+            case "move_accessory_to_room":
+                let id = args["id"]?.stringValue
+                let name = args["name"]?.stringValue
+                guard id != nil || name != nil else {
+                    return CallTool.Result(content: [.text("Either 'id' or 'name' is required")], isError: true)
+                }
+                guard let room = args["room"]?.stringValue else {
+                    return CallTool.Result(content: [.text("Missing required parameter: room")], isError: true)
+                }
+                let home = args["home"]?.stringValue
+                result = try await homeKitManager.moveAccessoryToRoom(id: id, name: name, homeName: home, roomName: room)
+
             default:
                 return CallTool.Result(
                     content: [.text("Unknown tool: \(params.name)")],

@@ -181,8 +181,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("Unknown tool"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("Unknown tool"))
         } else {
             Issue.record("Expected text content in error result")
         }
@@ -197,8 +197,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("'id' or 'name'"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("'id' or 'name'"))
         }
     }
 
@@ -209,8 +209,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("'id' or 'name'"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("'id' or 'name'"))
         }
     }
 
@@ -221,8 +221,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("Missing required parameter: action"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("Missing required parameter: action"))
         }
     }
 
@@ -236,8 +236,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("Device 'Ghost' not found"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("Device 'Ghost' not found"))
         }
     }
 
@@ -252,8 +252,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("not reachable"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("not reachable"))
         }
     }
 
@@ -268,8 +268,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("Unknown action"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("Unknown action"))
         }
     }
 
@@ -284,8 +284,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("Invalid value"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("Invalid value"))
         }
     }
 
@@ -323,8 +323,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("commands"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("commands"))
         }
     }
 
@@ -371,8 +371,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("devices"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("devices"))
         }
     }
 
@@ -419,8 +419,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("action"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("action"))
         }
     }
 
@@ -434,8 +434,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("filter"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("filter"))
         }
     }
 
@@ -525,8 +525,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("'id' or 'name'"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("'id' or 'name'"))
         }
     }
 
@@ -541,8 +541,8 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError == true)
-        if case .text(let text) = result.content.first {
-            #expect(text.contains("Scene 'Ghost Scene' not found"))
+        if case .text(let textContent) = result.content.first {
+            #expect(textContent.text.contains("Scene 'Ghost Scene' not found"))
         }
     }
 
@@ -623,12 +623,12 @@ struct MCPServerManagerTests {
         let result = await manager.handleToolCall(params)
 
         #expect(result.isError != true)
-        if case .text(let text) = result.content.first {
+        if case .text(let textContent) = result.content.first {
             // Should be valid JSON
-            let data = text.data(using: .utf8)!
+            let data = textContent.text.data(using: .utf8)!
             let parsed = try? JSONSerialization.jsonObject(with: data)
             #expect(parsed != nil, "Response should be valid JSON")
-            #expect(text.contains("My Home"))
+            #expect(textContent.text.contains("My Home"))
         } else {
             Issue.record("Expected text content in result")
         }

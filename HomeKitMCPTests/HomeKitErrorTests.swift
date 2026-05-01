@@ -32,4 +32,29 @@ struct HomeKitErrorTests {
         let error = HomeKitError.unknownAction("fly")
         #expect(error.errorDescription == "Unknown action: 'fly'")
     }
+
+    @Test func roomNotFoundHasDescription() {
+        let error = HomeKitError.roomNotFound("Office")
+        #expect(error.errorDescription == "Room 'Office' not found")
+    }
+
+    @Test func zoneNotFoundHasDescription() {
+        let error = HomeKitError.zoneNotFound("Upstairs")
+        #expect(error.errorDescription == "Zone 'Upstairs' not found")
+    }
+
+    @Test func homeNotFoundHasDescription() {
+        let error = HomeKitError.homeNotFound("Beach House")
+        #expect(error.errorDescription == "Home 'Beach House' not found")
+    }
+
+    @Test func sceneAlreadyExistsHasDescription() {
+        let error = HomeKitError.sceneAlreadyExists("Good Night")
+        #expect(error.errorDescription == "Scene 'Good Night' already exists")
+    }
+
+    @Test func cannotRemoveDefaultRoomHasDescription() {
+        let error = HomeKitError.cannotRemoveDefaultRoom
+        #expect(error.errorDescription == "Cannot remove the default room")
+    }
 }

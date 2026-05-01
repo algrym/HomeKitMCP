@@ -641,6 +641,11 @@ enum HomeKitError: LocalizedError {
     case invalidValue(String)
     case unknownAction(String)
     case sceneNotFound(String)
+    case roomNotFound(String)
+    case zoneNotFound(String)
+    case homeNotFound(String)
+    case sceneAlreadyExists(String)
+    case cannotRemoveDefaultRoom
 
     var errorDescription: String? {
         switch self {
@@ -651,6 +656,11 @@ enum HomeKitError: LocalizedError {
         case .invalidValue(let msg): "Invalid value: \(msg)"
         case .unknownAction(let action): "Unknown action: '\(action)'"
         case .sceneNotFound(let name): "Scene '\(name)' not found"
+        case .roomNotFound(let name): "Room '\(name)' not found"
+        case .zoneNotFound(let name): "Zone '\(name)' not found"
+        case .homeNotFound(let name): "Home '\(name)' not found"
+        case .sceneAlreadyExists(let name): "Scene '\(name)' already exists"
+        case .cannotRemoveDefaultRoom: "Cannot remove the default room"
         }
     }
 }

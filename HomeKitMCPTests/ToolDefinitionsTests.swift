@@ -5,7 +5,7 @@ import Testing
 struct ToolDefinitionsTests {
 
     @Test func allToolsCount() {
-        #expect(ToolDefinitions.all.count == 27)
+        #expect(ToolDefinitions.all.count == 29)
     }
 
     @Test func toolNamesAreCorrect() {
@@ -19,6 +19,7 @@ struct ToolDefinitionsTests {
             "rename_accessory", "remove_accessory", "identify_accessory",
             "add_scene", "rename_scene", "remove_scene",
             "rename_home",
+            "backup_home", "restore_home",
         ])
     }
 
@@ -127,6 +128,29 @@ struct ToolDefinitionsTests {
             #expect(properties.count == 3, "list_devices should have exactly 3 properties")
         } else {
             Issue.record("list_devices inputSchema is not structured as expected")
+        }
+    }
+
+    @Test func restoreHomeHasBackupAndConfirmProperties() {
+        let tool = ToolDefinitions.restoreHome
+        if case .object(let schema) = tool.inputSchema,
+           case .object(let properties) = schema["properties"] {
+            #expect(properties["backup"] != nil, "restore_home should have a 'backup' property")
+            #expect(properties["confirm"] != nil, "restore_home should have a 'confirm' property")
+            #expect(schema["required"] == .array([.string("backup")]))
+        } else {
+            Issue.record("restore_home inputSchema is not an object")
+        }
+    }
+
+    @Test func backupHomeHasOptionalHomeProperty() {
+        let tool = ToolDefinitions.backupHome
+        if case .object(let schema) = tool.inputSchema,
+           case .object(let properties) = schema["properties"] {
+            #expect(properties["home"] != nil)
+            #expect(schema["required"] == nil)
+        } else {
+            Issue.record("backup_home inputSchema is not an object")
         }
     }
 }

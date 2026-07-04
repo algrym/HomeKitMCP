@@ -678,6 +678,39 @@ enum ToolDefinitions {
         ])
     )
 
+    static let backupHome = Tool(
+        name: "backup_home",
+        description: "Capture a home's organizational structure (rooms, zones, accessory-to-room assignments, names, and scene definitions) as a JSON snapshot you can save and later restore with restore_home. Does not capture runtime device state (on/off, brightness).",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "home": .object([
+                    "type": .string("string"),
+                    "description": .string("Home name to back up. Omit to back up the primary home."),
+                ]),
+            ]),
+        ])
+    )
+
+    static let restoreHome = Tool(
+        name: "restore_home",
+        description: "Re-apply a snapshot from backup_home. Merge-only: creates missing rooms/zones/scenes and re-applies names, accessory-to-room assignments, zone memberships, and scene actions. Never deletes anything or unpairs accessories. Returns a preview by default; pass confirm=true to apply.",
+        inputSchema: .object([
+            "type": .string("object"),
+            "properties": .object([
+                "backup": .object([
+                    "type": .string("object"),
+                    "description": .string("A snapshot object previously returned by backup_home."),
+                ]),
+                "confirm": .object([
+                    "type": .string("boolean"),
+                    "description": .string("false or omitted = dry-run preview of changes; true = apply the changes."),
+                ]),
+            ]),
+            "required": .array([.string("backup")]),
+        ])
+    )
+
     static let all: [Tool] = [
         listHomes, listRooms, listDevices, getDeviceState, controlDevice,
         batchControlDevices, batchGetDeviceState, controlDevicesByFilter,
@@ -687,5 +720,6 @@ enum ToolDefinitions {
         renameAccessory, removeAccessory, identifyAccessory,
         addScene, renameScene, removeScene,
         renameHome,
+        backupHome, restoreHome,
     ]
 }

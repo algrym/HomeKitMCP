@@ -666,14 +666,21 @@ final class HomeKitManager: NSObject {
         let scenes = home.actionSets
             .filter { $0.actionSetType == HMActionSetTypeUserDefined }
             .map { actionSet -> SceneSnapshot in
-                let actions: [SceneAction] = actionSet.actions.compactMap { action in
-                    guard let write = action as? HMCharacteristicWriteAction<NSCopying>,
-                          let accUUID = write.characteristic.service?.accessory?.uniqueIdentifier
+                let actions: [SceneAction] = actionSet.actions.compactMap { action -> SceneAction? in
+                    // HMCharacteristicWriteAction is generic over its target-value type and Swift
+                    // generics are invariant, so a checked `as? HMCharacteristicWriteAction<NSCopying>`
+                    // cast fails for real actions (e.g. <NSNumber>). Read the ObjC properties by key,
+                    // guarded by an ObjC class-membership check, to capture the value regardless of type.
+                    guard let writeClass = NSClassFromString("HMCharacteristicWriteAction"),
+                          action.isKind(of: writeClass),
+                          let characteristic = action.value(forKey: "characteristic") as? HMCharacteristic,
+                          let accUUID = characteristic.service?.accessory?.uniqueIdentifier
                     else { return nil }
+                    let target = action.value(forKey: "targetValue")
                     return SceneAction(
                         accessory: accUUID.uuidString,
-                        characteristicType: write.characteristic.characteristicType,
-                        targetValue: Self.jsonValue(from: write.targetValue))
+                        characteristicType: characteristic.characteristicType,
+                        targetValue: Self.jsonValue(from: target))
                 }
                 return SceneSnapshot(name: actionSet.name,
                                      uniqueIdentifier: actionSet.uniqueIdentifier.uuidString,

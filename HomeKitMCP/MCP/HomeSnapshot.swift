@@ -50,24 +50,24 @@ nonisolated struct SceneAction: Codable, Equatable {
 
 /// Minimal JSON primitive holder so heterogeneous HomeKit characteristic values
 /// survive Codable round-trips as raw JSON.
+///
+/// JSON has exactly one numeric type, so there's no way to distinguish an
+/// "int" from a "double" once a value has been through an encode/decode
+/// cycle (which every persisted snapshot goes through). Modeling two numeric
+/// cases here would leave one of them permanently dead after a JSON
+/// round-trip, so numbers are represented with a single `.number(Double)`
+/// case that matches what JSON actually is. A later task coerces this to the
+/// exact HomeKit characteristic type (Int, Bool, etc.) at write time.
 nonisolated enum JSONValue: Codable, Equatable {
-    case bool(Bool), int(Int), double(Double), string(String), null
+    case number(Double), bool(Bool), string(String), null
 
     init(from decoder: Decoder) throws {
         let c = try decoder.singleValueContainer()
-        // Try Double before Int: JSON has one number type, so a whole-number
-        // literal like "30" matches both Int and Double decoders. Foundation's
-        // JSONDecoder doesn't expose whether the source literal had a decimal
-        // point, so this order can't be "fixed" to perfectly recover the
-        // original Swift type in all cases — it's an inherent JSON round-trip
-        // ambiguity, not a bug in this reordering. Preferring Double here means
-        // whole-number values written by `.int(n)` decode back as `.double(n)`;
-        // `.int` remains reachable only for values constructed directly in code
-        // (never produced by decoding a plain JSON number).
+        // Bool MUST be tried before Double: Foundation's JSONDecoder will
+        // happily decode `true`/`false` as 1.0/0.0 if Double is tried first.
         if c.decodeNil() { self = .null }
         else if let b = try? c.decode(Bool.self) { self = .bool(b) }
-        else if let d = try? c.decode(Double.self) { self = .double(d) }
-        else if let i = try? c.decode(Int.self) { self = .int(i) }
+        else if let d = try? c.decode(Double.self) { self = .number(d) }
         else if let s = try? c.decode(String.self) { self = .string(s) }
         else { self = .null }
     }
@@ -75,9 +75,8 @@ nonisolated enum JSONValue: Codable, Equatable {
     func encode(to encoder: Encoder) throws {
         var c = encoder.singleValueContainer()
         switch self {
+        case .number(let d): try c.encode(d)
         case .bool(let b): try c.encode(b)
-        case .int(let i): try c.encode(i)
-        case .double(let d): try c.encode(d)
         case .string(let s): try c.encode(s)
         case .null: try c.encodeNil()
         }
@@ -86,9 +85,8 @@ nonisolated enum JSONValue: Codable, Equatable {
     /// The native value for handing to HomeKit as a characteristic target.
     var anyValue: Any {
         switch self {
+        case .number(let d): return d
         case .bool(let b): return b
-        case .int(let i): return i
-        case .double(let d): return d
         case .string(let s): return s
         case .null: return NSNull()
         }

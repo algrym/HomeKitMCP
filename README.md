@@ -97,6 +97,10 @@ The `--headless` flag runs the server without the menu bar status item, which is
 | `control_devices_by_filter` | Apply an action to all devices matching a filter (e.g. all lights in a room) |
 | `list_scenes` | List HomeKit scenes/action sets |
 | `execute_scene` | Trigger a scene by name or ID |
+| `backup_home` | Capture a home's structure (rooms, zones, accessory→room assignments, names, scene definitions) as a JSON snapshot |
+| `restore_home` | Re-apply a snapshot (merge-only, never deletes); previews changes by default, applies with `confirm: true` |
+
+> `backup_home`/`restore_home` protect the **organizational layer** — the rooms, zones, accessory→room assignments, and names that are unique HomeKit state and painful to rebuild by hand. Scenes bridged from another controller (e.g. Home Assistant) carry no HomeKit-native actions, so they are captured by name only; back those up on the source system.
 
 ### Supported Device Types
 

@@ -102,6 +102,30 @@ The `--headless` flag runs the server without the menu bar status item, which is
 
 > `backup_home`/`restore_home` protect the **organizational layer** — the rooms, zones, accessory→room assignments, and names that are unique HomeKit state and painful to rebuild by hand. Scenes bridged from another controller (e.g. Home Assistant) carry no HomeKit-native actions, so they are captured by name only; back those up on the source system.
 
+### Home Management Tools
+
+Tools for reorganizing a home's structure. These write to HomeKit; `remove_accessory` is destructive and requires explicit confirmation.
+
+| Tool | Description |
+|------|-------------|
+| `add_room` | Create a new room in a home |
+| `rename_room` | Rename an existing room |
+| `remove_room` | Delete a room (its accessories move to the Default Room) |
+| `move_accessory_to_room` | Move an accessory to a different room (by name or unique ID) |
+| `list_zones` | List zones (groups of rooms), optionally filtered by home |
+| `add_zone` | Create a new zone (e.g. "Upstairs") |
+| `rename_zone` | Rename an existing zone |
+| `remove_zone` | Delete a zone (rooms and accessories are unaffected) |
+| `add_room_to_zone` | Add an existing room to a zone |
+| `remove_room_from_zone` | Remove a room from a zone (the room itself is not deleted) |
+| `rename_accessory` | Rename an accessory (by name or unique ID) |
+| `remove_accessory` | Permanently unpair an accessory — **destructive**, requires `confirm: true` |
+| `identify_accessory` | Trigger an accessory's identify action (blink/beep) to locate it |
+| `add_scene` | Create a new (empty) scene |
+| `rename_scene` | Rename an existing scene (by name or unique ID) |
+| `remove_scene` | Delete a scene (by name or unique ID) |
+| `rename_home` | Rename a home |
+
 ### Supported Device Types
 
 | Type | Read | Control |

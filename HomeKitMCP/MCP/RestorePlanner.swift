@@ -50,9 +50,9 @@ nonisolated enum RestorePlanner {
         let curRoomNames = Set(current.rooms.map { $0.name.lowercased() })
         let curAccByUUID = Dictionary(current.accessories.map { ($0.uniqueIdentifier, $0) }, uniquingKeysWith: { a, _ in a })
         let curZonesByUUID = Dictionary(current.zones.map { ($0.uniqueIdentifier, $0) }, uniquingKeysWith: { a, _ in a })
-        let curZoneNames = Set(current.zones.map { $0.name.lowercased() })
+        let curZonesByName = Dictionary(current.zones.map { ($0.name.lowercased(), $0) }, uniquingKeysWith: { a, _ in a })
         let curScenesByUUID = Dictionary(current.scenes.map { ($0.uniqueIdentifier, $0) }, uniquingKeysWith: { a, _ in a })
-        let curSceneNames = Set(current.scenes.map { $0.name.lowercased() })
+        let curScenesByName = Dictionary(current.scenes.map { ($0.name.lowercased(), $0) }, uniquingKeysWith: { a, _ in a })
         let presentAccessoryUUIDs = Set(current.accessories.map { $0.uniqueIdentifier })
 
         // Rooms: create-missing (by uuid then name) or rename-back
@@ -80,11 +80,11 @@ nonisolated enum RestorePlanner {
 
         // Zones: create-missing or rename-back; add missing memberships (additive)
         for zone in backup.zones {
-            if let cur = curZonesByUUID[zone.uniqueIdentifier] {
+            if let cur = curZonesByUUID[zone.uniqueIdentifier] ?? curZonesByName[zone.name.lowercased()] {
                 let have = Set(cur.rooms.map { $0.lowercased() })
                 let missing = zone.rooms.filter { !have.contains($0.lowercased()) }
                 if !missing.isEmpty { plan.addRoomsToZones.append(.init(zone: zone.name, rooms: missing)) }
-            } else if !curZoneNames.contains(zone.name.lowercased()) {
+            } else {
                 plan.createZones.append(zone.name)
                 if !zone.rooms.isEmpty { plan.addRoomsToZones.append(.init(zone: zone.name, rooms: zone.rooms)) }
             }
@@ -92,10 +92,8 @@ nonisolated enum RestorePlanner {
 
         // Scenes: create-missing; set actions only when the applicable action set differs
         for scene in backup.scenes {
-            let existing = curScenesByUUID[scene.uniqueIdentifier]
-            if existing == nil && !curSceneNames.contains(scene.name.lowercased()) {
-                plan.createScenes.append(scene.name)
-            }
+            let existing = curScenesByUUID[scene.uniqueIdentifier] ?? curScenesByName[scene.name.lowercased()]
+            if existing == nil { plan.createScenes.append(scene.name) }
             // applicable actions = those whose accessory is still present
             var applicable: [SceneAction] = []
             for action in scene.actions {

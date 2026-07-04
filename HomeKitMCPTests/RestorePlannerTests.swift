@@ -94,4 +94,23 @@ struct RestorePlannerTests {
         #expect(plan.setSceneActions.isEmpty)   // its only action references a missing accessory
         #expect(skipped.missingCharacteristics == [RestoreSkipped.MissingCharacteristic(scene: "Movie", accessory: "gone", characteristicType: "bright")])
     }
+
+    @Test func zoneMatchedByNameOnlyStillAddsMissingRoom() {
+        let backup = snap(zones: [ZoneSnapshot(name: "Down", uniqueIdentifier: "z1", rooms: ["LR", "Kitchen"])])
+        let current = snap(zones: [ZoneSnapshot(name: "Down", uniqueIdentifier: "z9", rooms: ["LR"])]) // uuid drifted
+        let (plan, _) = RestorePlanner.plan(backup: backup, current: current)
+        #expect(plan.createZones.isEmpty)
+        #expect(plan.addRoomsToZones == [RestorePlan.ZoneRooms(zone: "Down", rooms: ["Kitchen"])])
+    }
+
+    @Test func sceneMatchedByNameOnlyWithIdenticalActionsIsIdempotent() {
+        let act = SceneAction(accessory: "a1", characteristicType: "bright", targetValue: .number(30))
+        let backup = snap(accessories: [AccessorySnapshot(uniqueIdentifier: "a1", name: "Lamp", room: "LR")],
+                          scenes: [SceneSnapshot(name: "Movie", uniqueIdentifier: "s1", actions: [act])])
+        let current = snap(accessories: [AccessorySnapshot(uniqueIdentifier: "a1", name: "Lamp", room: "LR")],
+                           scenes: [SceneSnapshot(name: "Movie", uniqueIdentifier: "s9", actions: [act])]) // uuid drifted, same content
+        let (plan, _) = RestorePlanner.plan(backup: backup, current: current)
+        #expect(plan.createScenes.isEmpty)
+        #expect(plan.setSceneActions.isEmpty)
+    }
 }

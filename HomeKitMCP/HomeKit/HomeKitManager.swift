@@ -648,10 +648,6 @@ final class HomeKitManager: NSObject {
     }
 
     // MARK: - Backup / Restore
-    //
-    // TEMPORARY stub for restoreHome to satisfy HomeKitProviding conformance
-    // so the app target compiles. Task 6 replaces this with a real
-    // implementation.
 
     func snapshotHome(homeName: String?) async throws -> HomeSnapshot {
         let home = try resolveHome(name: homeName)
@@ -706,7 +702,84 @@ final class HomeKitManager: NSObject {
     }
 
     func restoreHome(backup: HomeSnapshot, confirm: Bool) async throws -> RestoreOutcome {
-        throw HomeKitError.invalidValue("not yet implemented")
+        guard backup.formatVersion == HomeSnapshot.currentFormatVersion else {
+            throw HomeKitError.invalidValue("Unsupported backup formatVersion \(backup.formatVersion); expected \(HomeSnapshot.currentFormatVersion)")
+        }
+        // Resolve the target home: prefer the backup's home name, else primary.
+        let current = try await snapshotHome(homeName: backup.home.name)
+        let (plan, skipped) = RestorePlanner.plan(backup: backup, current: current)
+
+        let summary = "\(plan.changeCount) change(s); skipped \(skipped.missingAccessories.count) missing accessor" +
+            "\(skipped.missingAccessories.count == 1 ? "y" : "ies"), \(skipped.missingCharacteristics.count) scene action(s)"
+
+        guard confirm else {
+            return RestoreOutcome(dryRun: true, willApply: plan, skipped: skipped, summary: summary)
+        }
+
+        var failures: [String] = []
+        let homeName = backup.home.name
+
+        func attempt(_ label: String, _ op: () async throws -> Void) async {
+            do { try await op() } catch { failures.append("\(label): \(error.localizedDescription)") }
+        }
+
+        for name in plan.createRooms { await attempt("createRoom \(name)") { _ = try await self.addRoom(homeName: homeName, name: name) } }
+        for r in plan.renameRooms { await attempt("renameRoom \(r.from)->\(r.to)") { _ = try await self.renameRoom(homeName: homeName, roomName: r.from, newName: r.to) } }
+        for m in plan.moveAccessories { await attempt("move \(m.accessory)") { _ = try await self.moveAccessoryToRoom(id: nil, name: m.accessory, homeName: homeName, roomName: m.toRoom) } }
+        for r in plan.renameAccessories { await attempt("renameAccessory \(r.from)->\(r.to)") { _ = try await self.renameAccessory(id: nil, name: r.from, homeName: homeName, roomName: nil, newName: r.to) } }
+        for name in plan.createZones { await attempt("createZone \(name)") { _ = try await self.addZone(homeName: homeName, name: name) } }
+        for zr in plan.addRoomsToZones {
+            for room in zr.rooms { await attempt("addRoomToZone \(zr.zone)/\(room)") { _ = try await self.addRoomToZone(homeName: homeName, zoneName: zr.zone, roomName: room) } }
+        }
+        for name in plan.createScenes { await attempt("createScene \(name)") { _ = try await self.addScene(homeName: homeName, name: name) } }
+
+        // Scene actions: rebuild the action set to match the backup's applicable actions.
+        for scenePlan in plan.setSceneActions {
+            guard let backupScene = backup.scenes.first(where: { $0.name == scenePlan.scene }) else { continue }
+            await attempt("setSceneActions \(scenePlan.scene)") {
+                try await self.applySceneActions(homeName: homeName, scene: backupScene)
+            }
+        }
+
+        return RestoreOutcome(dryRun: false, willApply: plan, skipped: skipped, summary: summary,
+                              failures: failures.isEmpty ? nil : failures)
+    }
+
+    /// Replace an action set's characteristic-write actions to match the snapshot.
+    /// Only actions whose accessory + characteristic still exist are written.
+    private func applySceneActions(homeName: String?, scene: SceneSnapshot) async throws {
+        guard let actionSet = resolveActionSet(name: scene.name, homeName: homeName, id: nil) else {
+            throw HomeKitError.sceneNotFound(scene.name)
+        }
+        // Clear existing actions, then add the snapshot's.
+        for action in actionSet.actions { try await actionSet.removeAction(action) }
+        for sceneAction in scene.actions {
+            guard let accessory = resolveAccessory(id: sceneAction.accessory, name: nil, homeName: homeName, roomName: nil),
+                  let characteristic = accessory.services
+                    .flatMap({ $0.characteristics })
+                    .first(where: { $0.characteristicType == sceneAction.characteristicType })
+            else { continue }  // accessory/characteristic gone — skip (already reported in plan/skipped)
+            guard let targetValue = Self.coerce(sceneAction.targetValue, to: characteristic) else { continue }
+            let write = HMCharacteristicWriteAction<NSCopying>(characteristic: characteristic, targetValue: targetValue)
+            try await actionSet.addAction(write)
+        }
+    }
+
+    /// Coerce a snapshot value to an NSCopying object matching the characteristic's HAP
+    /// format, so integer characteristics (brightness, hue, …) receive NSNumber ints
+    /// rather than the Doubles that JSON round-tripping produces.
+    private static func coerce(_ value: JSONValue, to characteristic: HMCharacteristic) -> NSCopying? {
+        switch value {
+        case .number(let d):
+            switch characteristic.metadata?.format {
+            case HMCharacteristicMetadataFormatBool: return NSNumber(value: d != 0)
+            case HMCharacteristicMetadataFormatFloat: return NSNumber(value: d)
+            default: return NSNumber(value: Int(d))   // int / uint8 / uint16 / uint32 / uint64
+            }
+        case .bool(let b): return NSNumber(value: b)
+        case .string(let s): return s as NSString
+        case .null: return nil
+        }
     }
 
     // MARK: - Private: Scene Helpers

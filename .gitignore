@@ -1,2 +1,6 @@
 xcuserdata/
 Local.xcconfig
+
+# macOS + build/coverage junk
+.DS_Store
+default.profraw

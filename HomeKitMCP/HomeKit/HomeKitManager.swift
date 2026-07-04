@@ -649,12 +649,60 @@ final class HomeKitManager: NSObject {
 
     // MARK: - Backup / Restore
     //
-    // TEMPORARY stubs to satisfy HomeKitProviding conformance so the app
-    // target compiles. Task 5 (snapshotHome) and Task 6 (restoreHome)
-    // replace these with real implementations.
+    // TEMPORARY stub for restoreHome to satisfy HomeKitProviding conformance
+    // so the app target compiles. Task 6 replaces this with a real
+    // implementation.
 
     func snapshotHome(homeName: String?) async throws -> HomeSnapshot {
-        throw HomeKitError.invalidValue("not yet implemented")
+        let home = try resolveHome(name: homeName)
+
+        let rooms = home.rooms.map {
+            RoomSnapshot(name: $0.name, uniqueIdentifier: $0.uniqueIdentifier.uuidString)
+        }
+        let zones = home.zones.map {
+            ZoneSnapshot(name: $0.name, uniqueIdentifier: $0.uniqueIdentifier.uuidString,
+                         rooms: $0.rooms.map { $0.name })
+        }
+        let accessories = home.accessories.map {
+            AccessorySnapshot(uniqueIdentifier: $0.uniqueIdentifier.uuidString,
+                              name: $0.name, room: $0.room?.name ?? "Default Room")
+        }
+        let scenes = home.actionSets
+            .filter { $0.actionSetType == HMActionSetTypeUserDefined }
+            .map { actionSet -> SceneSnapshot in
+                let actions: [SceneAction] = actionSet.actions.compactMap { action in
+                    guard let write = action as? HMCharacteristicWriteAction<NSCopying>,
+                          let accUUID = write.characteristic.service?.accessory?.uniqueIdentifier
+                    else { return nil }
+                    return SceneAction(
+                        accessory: accUUID.uuidString,
+                        characteristicType: write.characteristic.characteristicType,
+                        targetValue: Self.jsonValue(from: write.targetValue))
+                }
+                return SceneSnapshot(name: actionSet.name,
+                                     uniqueIdentifier: actionSet.uniqueIdentifier.uuidString,
+                                     actions: actions)
+            }
+
+        let iso = ISO8601DateFormatter()
+        return HomeSnapshot(
+            formatVersion: HomeSnapshot.currentFormatVersion,
+            createdAt: iso.string(from: Date()),
+            home: HomeSnapshot.HomeRef(name: home.name, uniqueIdentifier: home.uniqueIdentifier.uuidString),
+            rooms: rooms, zones: zones, accessories: accessories, scenes: scenes)
+    }
+
+    /// Coerce a HomeKit characteristic value (NSNumber/NSString/Bool) to a JSONValue.
+    private static func jsonValue(from value: Any?) -> JSONValue {
+        switch value {
+        case let n as NSNumber:
+            // Bool is toll-free with NSNumber; distinguish it.
+            if CFGetTypeID(n) == CFBooleanGetTypeID() { return .bool(n.boolValue) }
+            return .number(n.doubleValue)
+        case let s as String: return .string(s)
+        case let b as Bool: return .bool(b)
+        default: return .null
+        }
     }
 
     func restoreHome(backup: HomeSnapshot, confirm: Bool) async throws -> RestoreOutcome {

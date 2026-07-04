@@ -646,6 +646,11 @@ struct MCPServerManagerTests {
         let params = CallTool.Parameters(name: "restore_home", arguments: [:])
         let result = await manager.handleToolCall(params)
         #expect(result.isError == true)
+        if case .text(let text) = result.content.first {
+            #expect(text.text.contains("backup"))
+        } else {
+            Issue.record("expected text content describing the missing backup")
+        }
     }
 
     // MARK: - Response Format

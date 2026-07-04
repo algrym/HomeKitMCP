@@ -14,13 +14,16 @@ nonisolated struct RestorePlan: Codable, Equatable {
     var moveAccessories: [Move] = []
     var renameAccessories: [Rename] = []
     var createZones: [String] = []
+    var renameZones: [Rename] = []
     var addRoomsToZones: [ZoneRooms] = []
     var createScenes: [String] = []
+    var renameScenes: [Rename] = []
     var setSceneActions: [SceneActionsPlan] = []
 
     var changeCount: Int {
         createRooms.count + renameRooms.count + moveAccessories.count + renameAccessories.count
-        + createZones.count + addRoomsToZones.count + createScenes.count + setSceneActions.count
+        + createZones.count + renameZones.count + addRoomsToZones.count
+        + createScenes.count + renameScenes.count + setSceneActions.count
     }
     var isEmpty: Bool { changeCount == 0 }
 }
@@ -91,7 +94,13 @@ nonisolated enum RestorePlanner {
 
         // Zones: create-missing or rename-back; add missing memberships (additive)
         for zone in backup.zones {
-            if let cur = curZonesByUUID[zone.uniqueIdentifier] ?? curZonesByName[zone.name.lowercased()] {
+            if let curByUUID = curZonesByUUID[zone.uniqueIdentifier] {
+                if curByUUID.name != zone.name { plan.renameZones.append(.init(from: curByUUID.name, to: zone.name)) }
+                let have = Set(curByUUID.rooms.map { $0.lowercased() })
+                let missing = zone.rooms.filter { !have.contains($0.lowercased()) }
+                if !missing.isEmpty { plan.addRoomsToZones.append(.init(zone: zone.name, rooms: missing)) }
+            } else if let cur = curZonesByName[zone.name.lowercased()] {
+                // Name-only match: the name already agrees, so no rename is needed.
                 let have = Set(cur.rooms.map { $0.lowercased() })
                 let missing = zone.rooms.filter { !have.contains($0.lowercased()) }
                 if !missing.isEmpty { plan.addRoomsToZones.append(.init(zone: zone.name, rooms: missing)) }
@@ -101,10 +110,20 @@ nonisolated enum RestorePlanner {
             }
         }
 
-        // Scenes: create-missing; set actions only when the applicable action set differs
+        // Scenes: create-missing or rename-back; set actions only when the applicable action set differs
+        // HMActionSet.actions is an unordered NSSet, so compare action lists by a canonical
+        // sort rather than array order to avoid spurious re-planning across launches.
+        func canon(_ a: [SceneAction]) -> [SceneAction] {
+            a.sorted { ($0.accessory, $0.characteristicType) < ($1.accessory, $1.characteristicType) }
+        }
         for scene in backup.scenes {
-            let existing = curScenesByUUID[scene.uniqueIdentifier] ?? curScenesByName[scene.name.lowercased()]
-            if existing == nil { plan.createScenes.append(scene.name) }
+            let existingByUUID = curScenesByUUID[scene.uniqueIdentifier]
+            let existing = existingByUUID ?? curScenesByName[scene.name.lowercased()]
+            if existing == nil {
+                plan.createScenes.append(scene.name)
+            } else if let existingByUUID, existingByUUID.name != scene.name {
+                plan.renameScenes.append(.init(from: existingByUUID.name, to: scene.name))
+            }
             // applicable actions = those whose accessory is still present
             var applicable: [SceneAction] = []
             for action in scene.actions {
@@ -115,7 +134,7 @@ nonisolated enum RestorePlanner {
                 }
             }
             let currentActions = existing?.actions ?? []
-            if applicable != currentActions && !applicable.isEmpty {
+            if canon(applicable) != canon(currentActions) && !applicable.isEmpty {
                 plan.setSceneActions.append(.init(scene: scene.name, actionCount: applicable.count))
             }
         }

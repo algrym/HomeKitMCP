@@ -682,6 +682,9 @@ final class HomeKitManager: NSObject {
                         characteristicType: characteristic.characteristicType,
                         targetValue: Self.jsonValue(from: target))
                 }
+                // HMActionSet.actions is an unordered NSSet; sort here so persisted
+                // snapshots are stable (and diff cleanly) across launches.
+                .sorted { ($0.accessory, $0.characteristicType) < ($1.accessory, $1.characteristicType) }
                 return SceneSnapshot(name: actionSet.name,
                                      uniqueIdentifier: actionSet.uniqueIdentifier.uuidString,
                                      actions: actions)
@@ -735,10 +738,12 @@ final class HomeKitManager: NSObject {
         for r in plan.renameAccessories { await attempt("renameAccessory \(r.from)->\(r.to)") { _ = try await self.renameAccessory(id: nil, name: r.from, homeName: homeName, roomName: nil, newName: r.to) } }
         for m in plan.moveAccessories { await attempt("move \(m.accessory)") { _ = try await self.moveAccessoryToRoom(id: nil, name: m.accessory, homeName: homeName, roomName: m.toRoom) } }
         for name in plan.createZones { await attempt("createZone \(name)") { _ = try await self.addZone(homeName: homeName, name: name) } }
+        for r in plan.renameZones { await attempt("renameZone \(r.from)->\(r.to)") { _ = try await self.renameZone(homeName: homeName, zoneName: r.from, newName: r.to) } }
         for zr in plan.addRoomsToZones {
             for room in zr.rooms { await attempt("addRoomToZone \(zr.zone)/\(room)") { _ = try await self.addRoomToZone(homeName: homeName, zoneName: zr.zone, roomName: room) } }
         }
         for name in plan.createScenes { await attempt("createScene \(name)") { _ = try await self.addScene(homeName: homeName, name: name) } }
+        for r in plan.renameScenes { await attempt("renameScene \(r.from)->\(r.to)") { _ = try await self.renameScene(homeName: homeName, name: r.from, id: nil, newName: r.to) } }
 
         // Scene actions: rebuild the action set to match the backup's applicable actions.
         for scenePlan in plan.setSceneActions {

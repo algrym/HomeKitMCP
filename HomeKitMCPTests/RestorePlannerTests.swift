@@ -113,4 +113,31 @@ struct RestorePlannerTests {
         #expect(plan.createScenes.isEmpty)
         #expect(plan.setSceneActions.isEmpty)
     }
+
+    @Test func zoneMatchedByUUIDWithDriftedNameIsRenamedBack() {
+        let backup = snap(zones: [ZoneSnapshot(name: "Downstairs", uniqueIdentifier: "z1", rooms: [])])
+        let current = snap(zones: [ZoneSnapshot(name: "Down", uniqueIdentifier: "z1", rooms: [])])
+        let (plan, _) = RestorePlanner.plan(backup: backup, current: current)
+        #expect(plan.renameZones == [RestorePlan.Rename(from: "Down", to: "Downstairs")])
+        #expect(plan.createZones.isEmpty)
+    }
+
+    @Test func sceneMatchedByUUIDWithDriftedNameIsRenamedBack() {
+        let backup = snap(scenes: [SceneSnapshot(name: "Movie Time", uniqueIdentifier: "s1", actions: [])])
+        let current = snap(scenes: [SceneSnapshot(name: "Movie", uniqueIdentifier: "s1", actions: [])])
+        let (plan, _) = RestorePlanner.plan(backup: backup, current: current)
+        #expect(plan.renameScenes == [RestorePlan.Rename(from: "Movie", to: "Movie Time")])
+        #expect(plan.createScenes.isEmpty)
+    }
+
+    @Test func sceneActionsCompareOrderInsensitively() {
+        let a1 = SceneAction(accessory: "a1", characteristicType: "bright", targetValue: .number(30))
+        let a2 = SceneAction(accessory: "a2", characteristicType: "power", targetValue: .bool(true))
+        let acc = [AccessorySnapshot(uniqueIdentifier: "a1", name: "L1", room: "R"),
+                   AccessorySnapshot(uniqueIdentifier: "a2", name: "L2", room: "R")]
+        let backup = snap(accessories: acc, scenes: [SceneSnapshot(name: "S", uniqueIdentifier: "s1", actions: [a1, a2])])
+        let current = snap(accessories: acc, scenes: [SceneSnapshot(name: "S", uniqueIdentifier: "s1", actions: [a2, a1])]) // reversed
+        let (plan, _) = RestorePlanner.plan(backup: backup, current: current)
+        #expect(plan.setSceneActions.isEmpty)
+    }
 }

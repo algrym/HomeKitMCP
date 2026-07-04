@@ -735,8 +735,8 @@ final class HomeKitManager: NSObject {
 
         for name in plan.createRooms { await attempt("createRoom \(name)") { _ = try await self.addRoom(homeName: homeName, name: name) } }
         for r in plan.renameRooms { await attempt("renameRoom \(r.from)->\(r.to)") { _ = try await self.renameRoom(homeName: homeName, roomName: r.from, newName: r.to) } }
-        for r in plan.renameAccessories { await attempt("renameAccessory \(r.from)->\(r.to)") { _ = try await self.renameAccessory(id: nil, name: r.from, homeName: homeName, roomName: nil, newName: r.to) } }
-        for m in plan.moveAccessories { await attempt("move \(m.accessory)") { _ = try await self.moveAccessoryToRoom(id: nil, name: m.accessory, homeName: homeName, roomName: m.toRoom) } }
+        for r in plan.renameAccessories { await attempt("renameAccessory \(r.from)->\(r.to)") { _ = try await self.renameAccessory(id: r.uuid, name: nil, homeName: homeName, roomName: nil, newName: r.to) } }
+        for m in plan.moveAccessories { await attempt("move \(m.accessory)") { _ = try await self.moveAccessoryToRoom(id: m.uuid, name: nil, homeName: homeName, roomName: m.toRoom) } }
         for name in plan.createZones { await attempt("createZone \(name)") { _ = try await self.addZone(homeName: homeName, name: name) } }
         for r in plan.renameZones { await attempt("renameZone \(r.from)->\(r.to)") { _ = try await self.renameZone(homeName: homeName, zoneName: r.from, newName: r.to) } }
         for zr in plan.addRoomsToZones {

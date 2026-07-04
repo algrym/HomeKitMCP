@@ -44,8 +44,27 @@ struct RestorePlannerTests {
             rooms: [RoomSnapshot(name: "LR", uniqueIdentifier: "r1")],
             accessories: [AccessorySnapshot(uniqueIdentifier: "a1", name: "Lamp", room: "Default Room")])
         let (plan, _) = RestorePlanner.plan(backup: backup, current: current)
-        #expect(plan.moveAccessories == [RestorePlan.Move(accessory: "Corner Lamp", fromRoom: "Default Room", toRoom: "LR")])
-        #expect(plan.renameAccessories == [RestorePlan.Rename(from: "Lamp", to: "Corner Lamp")])
+        #expect(plan.moveAccessories == [RestorePlan.Move(accessory: "Corner Lamp", uuid: "a1", fromRoom: "Default Room", toRoom: "LR")])
+        #expect(plan.renameAccessories == [RestorePlan.AccessoryRename(from: "Lamp", to: "Corner Lamp", uuid: "a1")])
+    }
+
+    // Regression: accessory moves/renames must carry the UUID so apply resolves the
+    // exact accessory, not a namesake. This home has two accessories named "Kitchen";
+    // only a1 drifted (renamed + moved). Resolving by name at apply time could hit a2.
+    @Test func moveAndRenameCarryUUIDToDisambiguateDuplicateNames() {
+        let rooms = [RoomSnapshot(name: "Kitchen", uniqueIdentifier: "r1"),
+                     RoomSnapshot(name: "Den", uniqueIdentifier: "r2")]
+        let backup = snap(
+            rooms: rooms,
+            accessories: [AccessorySnapshot(uniqueIdentifier: "a1", name: "Kitchen", room: "Kitchen"),
+                          AccessorySnapshot(uniqueIdentifier: "a2", name: "Kitchen", room: "Den")])
+        let current = snap(
+            rooms: rooms,
+            accessories: [AccessorySnapshot(uniqueIdentifier: "a1", name: "Kitchez", room: "Den"),  // drifted
+                          AccessorySnapshot(uniqueIdentifier: "a2", name: "Kitchen", room: "Den")])  // unchanged
+        let (plan, _) = RestorePlanner.plan(backup: backup, current: current)
+        #expect(plan.moveAccessories == [RestorePlan.Move(accessory: "Kitchen", uuid: "a1", fromRoom: "Den", toRoom: "Kitchen")])
+        #expect(plan.renameAccessories == [RestorePlan.AccessoryRename(from: "Kitchez", to: "Kitchen", uuid: "a1")])
     }
 
     @Test func missingAccessoryIsSkippedNotCreated() {

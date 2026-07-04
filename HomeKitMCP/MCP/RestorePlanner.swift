@@ -5,14 +5,17 @@ import Foundation
 /// only creates, renames, moves, or adds — it never deletes or removes.
 nonisolated struct RestorePlan: Codable, Equatable {
     nonisolated struct Rename: Codable, Equatable { let from: String; let to: String }
-    nonisolated struct Move: Codable, Equatable { let accessory: String; let fromRoom: String; let toRoom: String }
+    // Accessory renames/moves carry the accessory's UUID so apply resolves the exact
+    // object rather than a namesake — HomeKit permits duplicate accessory names.
+    nonisolated struct AccessoryRename: Codable, Equatable { let from: String; let to: String; let uuid: String }
+    nonisolated struct Move: Codable, Equatable { let accessory: String; let uuid: String; let fromRoom: String; let toRoom: String }
     nonisolated struct ZoneRooms: Codable, Equatable { let zone: String; let rooms: [String] }
     nonisolated struct SceneActionsPlan: Codable, Equatable { let scene: String; let actionCount: Int }
 
     var createRooms: [String] = []
     var renameRooms: [Rename] = []
     var moveAccessories: [Move] = []
-    var renameAccessories: [Rename] = []
+    var renameAccessories: [AccessoryRename] = []
     var createZones: [String] = []
     var renameZones: [Rename] = []
     var addRoomsToZones: [ZoneRooms] = []
@@ -85,10 +88,10 @@ nonisolated enum RestorePlanner {
                 continue
             }
             if cur.room.lowercased() != acc.room.lowercased() {
-                plan.moveAccessories.append(.init(accessory: acc.name, fromRoom: cur.room, toRoom: acc.room))
+                plan.moveAccessories.append(.init(accessory: acc.name, uuid: acc.uniqueIdentifier, fromRoom: cur.room, toRoom: acc.room))
             }
             if cur.name != acc.name {
-                plan.renameAccessories.append(.init(from: cur.name, to: acc.name))
+                plan.renameAccessories.append(.init(from: cur.name, to: acc.name, uuid: acc.uniqueIdentifier))
             }
         }
 

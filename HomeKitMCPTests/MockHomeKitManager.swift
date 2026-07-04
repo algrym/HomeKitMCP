@@ -89,8 +89,16 @@ final class MockHomeKitManager: HomeKitProviding {
 
     // MARK: - Protocol conformance
 
+    var stubbedReady = true
+    var waitUntilReadyCalled = false
+
     func start() async {
         startCalled = true
+    }
+
+    func waitUntilReady() async -> Bool {
+        waitUntilReadyCalled = true
+        return stubbedReady
     }
 
     func listHomes() -> [[String: Any]] {

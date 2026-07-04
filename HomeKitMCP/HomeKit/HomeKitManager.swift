@@ -4,26 +4,75 @@ import HomeKit
 @MainActor
 final class HomeKitManager: NSObject {
     private var homeManager: HMHomeManager?
-    private var readyContinuation: CheckedContinuation<Void, Never>?
-    private var isReady = false
+
+    /// Readiness lifecycle. `.ready` and `.unavailable` resolve pending waiters;
+    /// only `.idle`/`.waiting` are non-terminal. A late homes-loaded callback can
+    /// still promote `.unavailable` back to `.ready`, so a permission granted while
+    /// the server is running recovers without a restart.
+    private enum ReadyState { case idle, waiting, ready, unavailable }
+    private var state: ReadyState = .idle
+    private var readyWaiters: [CheckedContinuation<Bool, Never>] = []
+
+    /// How long to wait for HomeKit to report in before giving up. The authorization
+    /// prompt cannot be answered when the app is launched headless from a pipe, so we
+    /// must never wait forever — that is what wedged the whole server.
+    private static let readinessTimeout: Duration = .seconds(10)
 
     override init() {
         super.init()
     }
 
     func start() async {
-        guard homeManager == nil else { return }
-        let manager = HMHomeManager()
-        manager.delegate = self
-        homeManager = manager
-        Log.info("HomeKitManager: waiting for homes to load...")
+        _ = await waitUntilReady()
+    }
 
-        if !isReady {
-            await withCheckedContinuation { continuation in
-                readyContinuation = continuation
+    /// Ensure HomeKit has loaded, waiting at most `readinessTimeout`.
+    /// - Returns: `true` once homes have loaded; `false` if access was denied or
+    ///   HomeKit never reported in. Bounded — this never hangs.
+    @discardableResult
+    func waitUntilReady() async -> Bool {
+        switch state {
+        case .ready:
+            return true
+        case .unavailable:
+            return false
+        case .idle:
+            state = .waiting
+            let manager = HMHomeManager()
+            manager.delegate = self
+            homeManager = manager
+            Log.info("HomeKitManager: waiting for homes to load...")
+
+            // Arm a one-shot timeout so undetermined authorization (headless launch)
+            // resolves waiters instead of stalling the server indefinitely.
+            Task { @MainActor in
+                try? await Task.sleep(for: Self.readinessTimeout)
+                guard self.state == .waiting else { return }
+                Log.error("HomeKitManager: timed out waiting for HomeKit. Grant access in System Settings > Privacy & Security > HomeKit and confirm at least one home exists in the Home app, then restart the server.")
+                self.resolve(ready: false)
             }
+            return await withCheckedContinuation { readyWaiters.append($0) }
+        case .waiting:
+            return await withCheckedContinuation { readyWaiters.append($0) }
         }
-        Log.info("HomeKitManager: ready with \(manager.homes.count) home(s)")
+    }
+
+    /// Transition to a terminal state and wake all pending waiters.
+    private func resolve(ready: Bool) {
+        guard state == .waiting else { return }
+        state = ready ? .ready : .unavailable
+        let waiters = readyWaiters
+        readyWaiters.removeAll()
+        for waiter in waiters { waiter.resume(returning: ready) }
+    }
+
+    /// Promote to ready from any non-ready state (homes can load after we gave up).
+    private func markReady() {
+        guard state != .ready else { return }
+        state = .ready
+        let waiters = readyWaiters
+        readyWaiters.removeAll()
+        for waiter in waiters { waiter.resume(returning: true) }
     }
 
     // MARK: - Homes
@@ -881,9 +930,22 @@ extension HomeKitManager: HMHomeManagerDelegate {
     nonisolated func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
         Task { @MainActor in
             Log.info("HomeKitManager: homes updated (\(manager.homes.count) home(s))")
-            isReady = true
-            readyContinuation?.resume()
-            readyContinuation = nil
+            self.markReady()
+        }
+    }
+
+    nonisolated func homeManager(_ manager: HMHomeManager, didUpdate status: HMHomeManagerAuthorizationStatus) {
+        Task { @MainActor in
+            let authorized = status.contains(.authorized)
+            let determined = status.contains(.determined)
+            Log.info("HomeKitManager: authorization status (authorized=\(authorized), determined=\(determined))")
+            // A determined-but-denied status will never yield homes, so fail fast
+            // rather than waiting out the timeout. Undetermined (prompt pending) is
+            // left to the timeout, since it may still resolve if the user responds.
+            if determined && !authorized {
+                Log.error("HomeKitManager: HomeKit access denied or restricted. Enable it in System Settings > Privacy & Security > HomeKit, then restart the server.")
+                self.resolve(ready: false)
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ import Foundation
 @MainActor
 protocol HomeKitProviding {
     func start() async
+    @discardableResult func waitUntilReady() async -> Bool
     func listHomes() -> [[String: Any]]
     func listRooms(homeName: String?) -> [[String: Any]]
     func listDevices(homeName: String?, roomName: String?, type: String?) -> [[String: Any]]

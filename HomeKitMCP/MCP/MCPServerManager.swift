@@ -23,9 +23,6 @@ final class MCPServerManager: ObservableObject {
         setupSignalHandlers()
         Log.info("Starting HomeKit MCP server...")
 
-        // Initialize HomeKit first
-        await homeKitManager.start()
-
         // Create MCP server
         let server = Server(
             name: "HomeKitMCP",
@@ -36,6 +33,14 @@ final class MCPServerManager: ObservableObject {
 
         // Register tool handlers
         await registerToolHandlers(server: server)
+
+        // Initialize HomeKit in the background — do NOT block transport startup on it.
+        // HomeKit can be slow, unauthorized, or (when launched headless from a pipe)
+        // never report in. Blocking here starves the transport and, worse, prevents us
+        // from ever reaching waitUntilCompleted(), so stdin-close never exits the
+        // process — that is how orphaned instances pile up. Tool calls await readiness
+        // individually via waitUntilReady().
+        Task { await homeKitManager.start() }
 
         // Start transport
         let transport = StdioTransport()
@@ -115,6 +120,14 @@ final class MCPServerManager: ObservableObject {
     }
 
     func handleToolCall(_ params: CallTool.Parameters) async -> CallTool.Result {
+        // Every tool needs HomeKit. Wait (bounded) for it to be ready; return a clear,
+        // actionable error rather than hanging or silently reporting no devices.
+        guard await homeKitManager.waitUntilReady() else {
+            return CallTool.Result(
+                content: [.text("HomeKit is not available. Grant HomeKit access to HomeKitMCP in System Settings > Privacy & Security > HomeKit, make sure at least one home exists in the Home app, then restart the server.")],
+                isError: true
+            )
+        }
         do {
             let args = params.arguments ?? [:]
             let result: Any

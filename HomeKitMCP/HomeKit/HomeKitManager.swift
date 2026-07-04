@@ -725,8 +725,8 @@ final class HomeKitManager: NSObject {
 
         for name in plan.createRooms { await attempt("createRoom \(name)") { _ = try await self.addRoom(homeName: homeName, name: name) } }
         for r in plan.renameRooms { await attempt("renameRoom \(r.from)->\(r.to)") { _ = try await self.renameRoom(homeName: homeName, roomName: r.from, newName: r.to) } }
-        for m in plan.moveAccessories { await attempt("move \(m.accessory)") { _ = try await self.moveAccessoryToRoom(id: nil, name: m.accessory, homeName: homeName, roomName: m.toRoom) } }
         for r in plan.renameAccessories { await attempt("renameAccessory \(r.from)->\(r.to)") { _ = try await self.renameAccessory(id: nil, name: r.from, homeName: homeName, roomName: nil, newName: r.to) } }
+        for m in plan.moveAccessories { await attempt("move \(m.accessory)") { _ = try await self.moveAccessoryToRoom(id: nil, name: m.accessory, homeName: homeName, roomName: m.toRoom) } }
         for name in plan.createZones { await attempt("createZone \(name)") { _ = try await self.addZone(homeName: homeName, name: name) } }
         for zr in plan.addRoomsToZones {
             for room in zr.rooms { await attempt("addRoomToZone \(zr.zone)/\(room)") { _ = try await self.addRoomToZone(homeName: homeName, zoneName: zr.zone, roomName: room) } }
@@ -774,7 +774,7 @@ final class HomeKitManager: NSObject {
             switch characteristic.metadata?.format {
             case HMCharacteristicMetadataFormatBool: return NSNumber(value: d != 0)
             case HMCharacteristicMetadataFormatFloat: return NSNumber(value: d)
-            default: return NSNumber(value: Int(d))   // int / uint8 / uint16 / uint32 / uint64
+            default: return NSNumber(value: Int(d.rounded()))   // int / uint8 / uint16 / uint32 / uint64
             }
         case .bool(let b): return NSNumber(value: b)
         case .string(let s): return s as NSString

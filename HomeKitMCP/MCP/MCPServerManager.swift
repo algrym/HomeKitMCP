@@ -377,6 +377,20 @@ final class MCPServerManager: ObservableObject {
                 }
                 result = try await homeKitManager.renameHome(homeName: home, newName: newName)
 
+            case "backup_home":
+                let home = args["home"]?.stringValue
+                let snapshot = try await homeKitManager.snapshotHome(homeName: home)
+                result = try encodableToJSONObject(snapshot)
+
+            case "restore_home":
+                guard let backupValue = args["backup"] else {
+                    return CallTool.Result(content: [.text("Missing required parameter: backup")], isError: true)
+                }
+                let confirm = args["confirm"]?.boolValue ?? false
+                let backup = try decodeSnapshot(from: backupValue)
+                let outcome = try await homeKitManager.restoreHome(backup: backup, confirm: confirm)
+                result = try encodableToJSONObject(outcome)
+
             default:
                 return CallTool.Result(
                     content: [.text("Unknown tool: \(params.name)")],
@@ -420,5 +434,18 @@ final class MCPServerManager: ObservableObject {
             return result
         case .data(_, let d): return d
         }
+    }
+
+    /// Bridge a Codable value into the [String: Any] JSON object the tool path serializes.
+    func encodableToJSONObject<T: Encodable>(_ value: T) throws -> [String: Any] {
+        let data = try JSONEncoder().encode(value)
+        return (try JSONSerialization.jsonObject(with: data) as? [String: Any]) ?? [:]
+    }
+
+    /// Decode a backup snapshot from the incoming MCP Value argument.
+    func decodeSnapshot(from value: Value) throws -> HomeSnapshot {
+        let anyValue = convertValue(value)
+        let data = try JSONSerialization.data(withJSONObject: anyValue)
+        return try JSONDecoder().decode(HomeSnapshot.self, from: data)
     }
 }

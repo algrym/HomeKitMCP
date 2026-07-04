@@ -92,6 +92,14 @@ final class MockHomeKitManager: HomeKitProviding {
     var stubbedReady = true
     var waitUntilReadyCalled = false
 
+    var stubbedSnapshot = HomeSnapshot(formatVersion: 1, createdAt: "t",
+        home: .init(name: "H", uniqueIdentifier: "H"),
+        rooms: [], zones: [], accessories: [], scenes: [])
+    var stubbedRestoreOutcome = RestoreOutcome(dryRun: true, willApply: RestorePlan(),
+        skipped: RestoreSkipped(), summary: "no changes")
+    var snapshotHomeCalledWith: String??
+    var restoreHomeCalledWith: (backup: HomeSnapshot, confirm: Bool)?
+
     func start() async {
         startCalled = true
     }
@@ -99,6 +107,15 @@ final class MockHomeKitManager: HomeKitProviding {
     func waitUntilReady() async -> Bool {
         waitUntilReadyCalled = true
         return stubbedReady
+    }
+
+    func snapshotHome(homeName: String?) async throws -> HomeSnapshot {
+        snapshotHomeCalledWith = .some(homeName)
+        return stubbedSnapshot
+    }
+    func restoreHome(backup: HomeSnapshot, confirm: Bool) async throws -> RestoreOutcome {
+        restoreHomeCalledWith = (backup, confirm)
+        return stubbedRestoreOutcome
     }
 
     func listHomes() -> [[String: Any]] {

@@ -4,6 +4,8 @@ import Foundation
 protocol HomeKitProviding {
     func start() async
     @discardableResult func waitUntilReady() async -> Bool
+    func snapshotHome(homeName: String?) async throws -> HomeSnapshot
+    func restoreHome(backup: HomeSnapshot, confirm: Bool) async throws -> RestoreOutcome
     func listHomes() -> [[String: Any]]
     func listRooms(homeName: String?) -> [[String: Any]]
     func listDevices(homeName: String?, roomName: String?, type: String?) -> [[String: Any]]

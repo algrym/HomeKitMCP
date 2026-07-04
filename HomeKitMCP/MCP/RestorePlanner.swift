@@ -35,6 +35,17 @@ nonisolated struct RestoreSkipped: Codable, Equatable {
     var missingCharacteristics: [MissingCharacteristic] = []
 }
 
+/// Outcome of a `restore_home` MCP tool call: the plan that was (or would be)
+/// applied, anything skipped, a human-readable summary, and any failures
+/// encountered while applying (nil/empty on a dry run or full success).
+nonisolated struct RestoreOutcome: Codable, Equatable {
+    let dryRun: Bool
+    let willApply: RestorePlan
+    let skipped: RestoreSkipped
+    let summary: String
+    var failures: [String]? = nil
+}
+
 /// Pure diff/merge logic: compares a backup `HomeSnapshot` against the
 /// current live snapshot and produces an additive `RestorePlan` plus a
 /// `RestoreSkipped` record of anything that couldn't be matched. No HomeKit

@@ -647,6 +647,20 @@ final class HomeKitManager: NSObject {
         return ["success": true, "oldName": homeName, "newName": newName] as [String: Any]
     }
 
+    // MARK: - Backup / Restore
+    //
+    // TEMPORARY stubs to satisfy HomeKitProviding conformance so the app
+    // target compiles. Task 5 (snapshotHome) and Task 6 (restoreHome)
+    // replace these with real implementations.
+
+    func snapshotHome(homeName: String?) async throws -> HomeSnapshot {
+        throw HomeKitError.invalidValue("not yet implemented")
+    }
+
+    func restoreHome(backup: HomeSnapshot, confirm: Bool) async throws -> RestoreOutcome {
+        throw HomeKitError.invalidValue("not yet implemented")
+    }
+
     // MARK: - Private: Scene Helpers
 
     private func resolveActionSet(name: String?, homeName: String?, id: String?) -> HMActionSet? {

@@ -611,6 +611,43 @@ struct MCPServerManagerTests {
         #expect(dict?["num"] as? Int == 42)
     }
 
+    // MARK: - Backup / Restore Home
+
+    @Test func backupHomeRoutesAndReturnsSnapshotJSON() async {
+        let (manager, mock) = makeSUT()
+        mock.stubbedSnapshot = HomeSnapshot(formatVersion: 1, createdAt: "t",
+            home: .init(name: "My Home", uniqueIdentifier: "H"),
+            rooms: [RoomSnapshot(name: "LR", uniqueIdentifier: "r1")], zones: [], accessories: [], scenes: [])
+        let params = CallTool.Parameters(name: "backup_home", arguments: ["home": .string("My Home")])
+        let result = await manager.handleToolCall(params)
+        #expect(mock.snapshotHomeCalledWith == .some("My Home"))
+        #expect(result.isError != true)
+        if case .text(let text) = result.content.first {
+            #expect(text.text.contains("\"formatVersion\""))
+            #expect(text.text.contains("My Home"))
+        } else { Issue.record("expected text content") }
+    }
+
+    @Test func restoreHomeDefaultsToDryRun() async {
+        let (manager, mock) = makeSUT()
+        let backup: [String: Value] = [
+            "formatVersion": .int(1), "createdAt": .string("t"),
+            "home": .object(["name": .string("H"), "uniqueIdentifier": .string("H")]),
+            "rooms": .array([]), "zones": .array([]), "accessories": .array([]), "scenes": .array([]),
+        ]
+        let params = CallTool.Parameters(name: "restore_home", arguments: ["backup": .object(backup)])
+        let result = await manager.handleToolCall(params)
+        #expect(mock.restoreHomeCalledWith?.confirm == false)
+        #expect(result.isError != true)
+    }
+
+    @Test func restoreHomeMissingBackupIsError() async {
+        let (manager, _) = makeSUT()
+        let params = CallTool.Parameters(name: "restore_home", arguments: [:])
+        let result = await manager.handleToolCall(params)
+        #expect(result.isError == true)
+    }
+
     // MARK: - Response Format
 
     @Test func successfulListHomesReturnsValidJson() async {

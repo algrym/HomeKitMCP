@@ -720,8 +720,12 @@ final class HomeKitManager: NSObject {
         guard backup.formatVersion == HomeSnapshot.currentFormatVersion else {
             throw HomeKitError.invalidValue("Unsupported backup formatVersion \(backup.formatVersion); expected \(HomeSnapshot.currentFormatVersion)")
         }
-        // Resolve the target home: prefer the backup's home name, else primary.
-        let current = try await snapshotHome(homeName: backup.home.name)
+        // Resolve the target home by its stable UUID first, so a home renamed since the
+        // backup still resolves; fall back to the recorded name. Use the home's CURRENT
+        // name for the snapshot diff and every apply op.
+        let homeName = try resolveHomeForRestore(uuid: backup.home.uniqueIdentifier,
+                                                 name: backup.home.name).name
+        let current = try await snapshotHome(homeName: homeName)
         let (plan, skipped) = RestorePlanner.plan(backup: backup, current: current)
 
         let summary = "\(plan.changeCount) change(s); skipped \(skipped.missingAccessories.count) missing accessor" +
@@ -730,8 +734,6 @@ final class HomeKitManager: NSObject {
         guard confirm else {
             return RestoreOutcome(dryRun: true, willApply: plan, skipped: skipped, summary: summary)
         }
-
-        let homeName = backup.home.name
 
         // Run the ordered ops, continuing past any single failure. The op ordering and
         // this collect-and-continue loop are both unit-tested (RestoreOperationsTests);
@@ -893,6 +895,18 @@ final class HomeKitManager: NSObject {
             throw HomeKitError.homeNotFound("primary")
         }
         return home
+    }
+
+    /// Resolve the home a backup should restore into. Prefers the backup's stable
+    /// `uniqueIdentifier` so a home renamed since the backup still resolves (otherwise the
+    /// whole restore would hard-fail on `homeNotFound`); falls back to the recorded name.
+    private func resolveHomeForRestore(uuid: String, name: String) throws -> HMHome {
+        if let manager = homeManager,
+           let id = UUID(uuidString: uuid),
+           let home = manager.homes.first(where: { $0.uniqueIdentifier == id }) {
+            return home
+        }
+        return try resolveHome(name: name.isEmpty ? nil : name)
     }
 
     private func matchingHomes(name: String?) -> [HMHome] {

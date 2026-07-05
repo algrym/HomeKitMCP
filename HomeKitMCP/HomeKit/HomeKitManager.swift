@@ -734,32 +734,37 @@ final class HomeKitManager: NSObject {
         var failures: [String] = []
         let homeName = backup.home.name
 
-        func attempt(_ label: String, _ op: () async throws -> Void) async {
-            do { try await op() } catch { failures.append("\(label): \(error.localizedDescription)") }
-        }
-
-        for name in plan.createRooms { await attempt("createRoom \(name)") { _ = try await self.addRoom(homeName: homeName, name: name) } }
-        for r in plan.renameRooms { await attempt("renameRoom \(r.from)->\(r.to)") { _ = try await self.renameRoom(homeName: homeName, roomName: r.from, newName: r.to) } }
-        for r in plan.renameAccessories { await attempt("renameAccessory \(r.from)->\(r.to)") { _ = try await self.renameAccessory(id: r.uuid, name: nil, homeName: homeName, roomName: nil, newName: r.to) } }
-        for m in plan.moveAccessories { await attempt("move \(m.accessory)") { _ = try await self.moveAccessoryToRoom(id: m.uuid, name: nil, homeName: homeName, roomName: m.toRoom) } }
-        for name in plan.createZones { await attempt("createZone \(name)") { _ = try await self.addZone(homeName: homeName, name: name) } }
-        for r in plan.renameZones { await attempt("renameZone \(r.from)->\(r.to)") { _ = try await self.renameZone(homeName: homeName, zoneName: r.from, newName: r.to) } }
-        for zr in plan.addRoomsToZones {
-            for room in zr.rooms { await attempt("addRoomToZone \(zr.zone)/\(room)") { _ = try await self.addRoomToZone(homeName: homeName, zoneName: zr.zone, roomName: room) } }
-        }
-        for name in plan.createScenes { await attempt("createScene \(name)") { _ = try await self.addScene(homeName: homeName, name: name) } }
-        for r in plan.renameScenes { await attempt("renameScene \(r.from)->\(r.to)") { _ = try await self.renameScene(homeName: homeName, name: r.from, id: nil, newName: r.to) } }
-
-        // Scene actions: rebuild the action set to match the backup's applicable actions.
-        for scenePlan in plan.setSceneActions {
-            guard let backupScene = backup.scenes.first(where: { $0.name == scenePlan.scene }) else { continue }
-            await attempt("setSceneActions \(scenePlan.scene)") {
-                try await self.applySceneActions(homeName: homeName, scene: backupScene)
+        // The ordered apply steps (ordering + UUID resolution) come from the pure,
+        // unit-tested RestorePlanner.operations; here we only dispatch each, continuing
+        // on error so one failure doesn't abort the rest.
+        for op in RestorePlanner.operations(for: plan, backup: backup) {
+            do {
+                try await execute(op, homeName: homeName)
+            } catch {
+                failures.append("\(op.label): \(error.localizedDescription)")
             }
         }
 
         return RestoreOutcome(dryRun: false, willApply: plan, skipped: skipped, summary: summary,
                               failures: failures.isEmpty ? nil : failures)
+    }
+
+    /// Mechanically dispatch a single restore step to the corresponding management method.
+    /// All decision-making (what to do, in what order, with which identifier) lives in the
+    /// pure `RestorePlanner.operations`; this is the thin HomeKit-touching seam.
+    private func execute(_ op: RestoreOp, homeName: String?) async throws {
+        switch op {
+        case .createRoom(let n): _ = try await addRoom(homeName: homeName, name: n)
+        case .renameRoom(let f, let t): _ = try await renameRoom(homeName: homeName, roomName: f, newName: t)
+        case .renameAccessory(let u, let t): _ = try await renameAccessory(id: u, name: nil, homeName: homeName, roomName: nil, newName: t)
+        case .moveAccessory(let u, let r): _ = try await moveAccessoryToRoom(id: u, name: nil, homeName: homeName, roomName: r)
+        case .createZone(let n): _ = try await addZone(homeName: homeName, name: n)
+        case .renameZone(let f, let t): _ = try await renameZone(homeName: homeName, zoneName: f, newName: t)
+        case .addRoomToZone(let z, let r): _ = try await addRoomToZone(homeName: homeName, zoneName: z, roomName: r)
+        case .createScene(let n): _ = try await addScene(homeName: homeName, name: n)
+        case .renameScene(let f, let t): _ = try await renameScene(homeName: homeName, name: f, id: nil, newName: t)
+        case .setSceneActions(let s): try await applySceneActions(homeName: homeName, scene: s)
+        }
     }
 
     /// Replace an action set's characteristic-write actions to match the snapshot.

@@ -52,6 +52,40 @@ nonisolated struct RestoreOutcome: Codable, Equatable {
     var failures: [String]? = nil
 }
 
+/// A single ordered, executable step of a restore apply. Flattening a `RestorePlan`
+/// into these keeps the apply ordering and the (UUID-based) parameter resolution in
+/// pure, unit-testable code — the two places restore has historically had bugs
+/// (move-before-rename ordering; name-vs-UUID accessory resolution). `HomeKitManager`
+/// only mechanically dispatches each op to an existing management method.
+nonisolated enum RestoreOp: Equatable {
+    case createRoom(String)
+    case renameRoom(from: String, to: String)
+    case renameAccessory(uuid: String, to: String)
+    case moveAccessory(uuid: String, toRoom: String)
+    case createZone(String)
+    case renameZone(from: String, to: String)
+    case addRoomToZone(zone: String, room: String)
+    case createScene(String)
+    case renameScene(from: String, to: String)
+    case setSceneActions(SceneSnapshot)
+
+    /// Human-readable tag used in per-item failure messages.
+    var label: String {
+        switch self {
+        case .createRoom(let n): return "createRoom \(n)"
+        case .renameRoom(let f, let t): return "renameRoom \(f)->\(t)"
+        case .renameAccessory(let u, let t): return "renameAccessory \(u)->\(t)"
+        case .moveAccessory(let u, let r): return "moveAccessory \(u)->\(r)"
+        case .createZone(let n): return "createZone \(n)"
+        case .renameZone(let f, let t): return "renameZone \(f)->\(t)"
+        case .addRoomToZone(let z, let r): return "addRoomToZone \(z)/\(r)"
+        case .createScene(let n): return "createScene \(n)"
+        case .renameScene(let f, let t): return "renameScene \(f)->\(t)"
+        case .setSceneActions(let s): return "setSceneActions \(s.name)"
+        }
+    }
+}
+
 /// Pure diff/merge logic: compares a backup `HomeSnapshot` against the
 /// current live snapshot and produces an additive `RestorePlan` plus a
 /// `RestoreSkipped` record of anything that couldn't be matched. No HomeKit
@@ -146,5 +180,32 @@ nonisolated enum RestorePlanner {
         }
 
         return (plan, skipped)
+    }
+
+    /// Flatten a plan into the ordered list of apply steps. Order matters:
+    /// - accessories are renamed BEFORE they are moved (guards the original ordering bug),
+    /// - structure (rooms/zones) is created before it is referenced,
+    /// - scene actions run last, once their accessories are in place.
+    /// `addRoomsToZones` is expanded to one op per room; `setSceneActions` resolves each
+    /// scene back to its backup `SceneSnapshot` (skipped if the backup lacks it).
+    static func operations(for plan: RestorePlan, backup: HomeSnapshot) -> [RestoreOp] {
+        var ops: [RestoreOp] = []
+        for n in plan.createRooms { ops.append(.createRoom(n)) }
+        for r in plan.renameRooms { ops.append(.renameRoom(from: r.from, to: r.to)) }
+        for r in plan.renameAccessories { ops.append(.renameAccessory(uuid: r.uuid, to: r.to)) }
+        for m in plan.moveAccessories { ops.append(.moveAccessory(uuid: m.uuid, toRoom: m.toRoom)) }
+        for n in plan.createZones { ops.append(.createZone(n)) }
+        for r in plan.renameZones { ops.append(.renameZone(from: r.from, to: r.to)) }
+        for zr in plan.addRoomsToZones {
+            for room in zr.rooms { ops.append(.addRoomToZone(zone: zr.zone, room: room)) }
+        }
+        for n in plan.createScenes { ops.append(.createScene(n)) }
+        for r in plan.renameScenes { ops.append(.renameScene(from: r.from, to: r.to)) }
+        for sp in plan.setSceneActions {
+            if let scene = backup.scenes.first(where: { $0.name == sp.scene }) {
+                ops.append(.setSceneActions(scene))
+            }
+        }
+        return ops
     }
 }

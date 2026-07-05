@@ -731,22 +731,32 @@ final class HomeKitManager: NSObject {
             return RestoreOutcome(dryRun: true, willApply: plan, skipped: skipped, summary: summary)
         }
 
-        var failures: [String] = []
         let homeName = backup.home.name
 
-        // The ordered apply steps (ordering + UUID resolution) come from the pure,
-        // unit-tested RestorePlanner.operations; here we only dispatch each, continuing
-        // on error so one failure doesn't abort the rest.
-        for op in RestorePlanner.operations(for: plan, backup: backup) {
-            do {
-                try await execute(op, homeName: homeName)
-            } catch {
-                failures.append("\(op.label): \(error.localizedDescription)")
-            }
+        // Run the ordered ops, continuing past any single failure. The op ordering and
+        // this collect-and-continue loop are both unit-tested (RestoreOperationsTests);
+        // here we only supply the HomeKit-touching executor.
+        let failures = await Self.runOperations(RestorePlanner.operations(for: plan, backup: backup)) { op in
+            try await self.execute(op, homeName: homeName)
         }
 
         return RestoreOutcome(dryRun: false, willApply: plan, skipped: skipped, summary: summary,
                               failures: failures.isEmpty ? nil : failures)
+    }
+
+    /// Execute each restore op in order, continuing past failures and collecting a labelled
+    /// error string for each. The executor is injected, so this continue-on-error control
+    /// flow is unit-testable with a stub executor and no HomeKit.
+    static func runOperations(
+        _ ops: [RestoreOp],
+        _ execute: (RestoreOp) async throws -> Void
+    ) async -> [String] {
+        var failures: [String] = []
+        for op in ops {
+            do { try await execute(op) }
+            catch { failures.append("\(op.label): \(error.localizedDescription)") }
+        }
+        return failures
     }
 
     /// Mechanically dispatch a single restore step to the corresponding management method.

@@ -80,4 +80,36 @@ struct RestoreOperationsTests {
             .setSceneActions(scene),
         ])
     }
+
+    // --- runOperations: continue-on-error control flow (executor injected, no HomeKit) ---
+
+    private struct Boom: Error {}
+
+    @Test @MainActor func runOperationsContinuesPastAFailureAndLabelsIt() async {
+        let ops: [RestoreOp] = [.createRoom("A"), .createRoom("B"), .createScene("C")]
+        var attempted: [RestoreOp] = []
+        let failures = await HomeKitManager.runOperations(ops) { op in
+            attempted.append(op)
+            if op == .createRoom("B") { throw Boom() }
+        }
+        #expect(attempted == ops)                                  // every op tried despite B failing
+        #expect(failures.count == 1)
+        #expect(failures.first?.hasPrefix("createRoom B:") == true) // labelled by the failing op
+    }
+
+    @Test @MainActor func runOperationsReportsNoFailuresWhenAllSucceed() async {
+        let failures = await HomeKitManager.runOperations([.createRoom("A"), .createZone("Z")]) { _ in }
+        #expect(failures.isEmpty)
+    }
+
+    @Test @MainActor func runOperationsCollectsEveryFailureInOrder() async {
+        let ops: [RestoreOp] = [.createRoom("A"), .renameRoom(from: "x", to: "y"), .createScene("C")]
+        let failures = await HomeKitManager.runOperations(ops) { op in
+            if case .createScene = op { throw Boom() }
+            if op == .createRoom("A") { throw Boom() }
+        }
+        #expect(failures.count == 2)
+        #expect(failures[0].hasPrefix("createRoom A:"))
+        #expect(failures[1].hasPrefix("createScene C:"))
+    }
 }

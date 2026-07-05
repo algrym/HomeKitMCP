@@ -46,6 +46,11 @@ nonisolated struct SceneAction: Codable, Equatable {
     let accessory: String          // accessory uniqueIdentifier
     let characteristicType: String
     let targetValue: JSONValue
+    // The exact characteristic's uniqueIdentifier. Disambiguates multi-service accessories
+    // (e.g. a multi-gang switch exposing the same characteristicType on several services),
+    // where matching by type alone would target an arbitrary one. Optional for backward
+    // compatibility with v1 backups written before this field existed.
+    var characteristicIdentifier: String? = nil
 }
 
 /// Minimal JSON primitive holder so heterogeneous HomeKit characteristic values

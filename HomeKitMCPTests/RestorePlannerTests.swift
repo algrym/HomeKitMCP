@@ -149,6 +149,26 @@ struct RestorePlannerTests {
         #expect(plan.createScenes.isEmpty)
     }
 
+    @Test func multiServiceSceneActionsDisambiguatedByCharacteristicIdentifier() {
+        // One accessory (e.g. a 2-gang switch) exposing the same characteristicType on two
+        // services, told apart only by characteristicIdentifier. Swapped target values must be
+        // detected as a difference — matching by (accessory, type) alone would miss it.
+        let acc = [AccessorySnapshot(uniqueIdentifier: "a1", name: "2-Gang", room: "R")]
+        func action(_ cid: String, _ on: Bool) -> SceneAction {
+            SceneAction(accessory: "a1", characteristicType: "power", targetValue: .bool(on), characteristicIdentifier: cid)
+        }
+        let backup = snap(accessories: acc, scenes: [SceneSnapshot(name: "S", uniqueIdentifier: "s1",
+            actions: [action("c1", true), action("c2", false)])])
+        // current has the two gangs' values swapped -> a re-set must be planned
+        let current = snap(accessories: acc, scenes: [SceneSnapshot(name: "S", uniqueIdentifier: "s1",
+            actions: [action("c1", false), action("c2", true)])])
+        let (plan, _) = RestorePlanner.plan(backup: backup, current: current)
+        #expect(plan.setSceneActions == [RestorePlan.SceneActionsPlan(scene: "S", actionCount: 2)])
+        // identical -> idempotent, no plan
+        let (same, _) = RestorePlanner.plan(backup: backup, current: backup)
+        #expect(same.setSceneActions.isEmpty)
+    }
+
     @Test func sceneActionsCompareOrderInsensitively() {
         let a1 = SceneAction(accessory: "a1", characteristicType: "bright", targetValue: .number(30))
         let a2 = SceneAction(accessory: "a2", characteristicType: "power", targetValue: .bool(true))

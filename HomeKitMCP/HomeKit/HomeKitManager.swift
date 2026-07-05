@@ -680,11 +680,16 @@ final class HomeKitManager: NSObject {
                     return SceneAction(
                         accessory: accUUID.uuidString,
                         characteristicType: characteristic.characteristicType,
-                        targetValue: Self.jsonValue(from: target))
+                        targetValue: Self.jsonValue(from: target),
+                        characteristicIdentifier: characteristic.uniqueIdentifier.uuidString)
                 }
                 // HMActionSet.actions is an unordered NSSet; sort here so persisted
-                // snapshots are stable (and diff cleanly) across launches.
-                .sorted { ($0.accessory, $0.characteristicType) < ($1.accessory, $1.characteristicType) }
+                // snapshots are stable (and diff cleanly) across launches. Include the
+                // characteristic identifier so multi-service accessories order deterministically.
+                .sorted {
+                    ($0.accessory, $0.characteristicType, $0.characteristicIdentifier ?? "")
+                        < ($1.accessory, $1.characteristicType, $1.characteristicIdentifier ?? "")
+                }
                 return SceneSnapshot(name: actionSet.name,
                                      uniqueIdentifier: actionSet.uniqueIdentifier.uuidString,
                                      actions: actions)
@@ -766,11 +771,20 @@ final class HomeKitManager: NSObject {
         // Clear existing actions, then add the snapshot's.
         for action in actionSet.actions { try await actionSet.removeAction(action) }
         for sceneAction in scene.actions {
-            guard let accessory = resolveAccessory(id: sceneAction.accessory, name: nil, homeName: homeName, roomName: nil),
-                  let characteristic = accessory.services
-                    .flatMap({ $0.characteristics })
-                    .first(where: { $0.characteristicType == sceneAction.characteristicType })
-            else { continue }  // accessory/characteristic gone — skip (already reported in plan/skipped)
+            guard let accessory = resolveAccessory(id: sceneAction.accessory, name: nil, homeName: homeName, roomName: nil)
+            else { continue }  // accessory gone — skip (already reported in plan/skipped)
+            let characteristics = accessory.services.flatMap { $0.characteristics }
+            // Prefer the exact characteristic by uniqueIdentifier so multi-service accessories
+            // (same characteristicType on several services) are unambiguous. Fall back to the
+            // first type-match for v1 backups that lack the identifier, or if it no longer resolves.
+            let match: HMCharacteristic?
+            if let cid = sceneAction.characteristicIdentifier, let uuid = UUID(uuidString: cid) {
+                match = characteristics.first(where: { $0.uniqueIdentifier == uuid })
+                    ?? characteristics.first(where: { $0.characteristicType == sceneAction.characteristicType })
+            } else {
+                match = characteristics.first(where: { $0.characteristicType == sceneAction.characteristicType })
+            }
+            guard let characteristic = match else { continue }  // characteristic gone — skip
             guard let targetValue = Self.coerce(sceneAction.targetValue, to: characteristic) else { continue }
             let write = HMCharacteristicWriteAction<NSCopying>(characteristic: characteristic, targetValue: targetValue)
             try await actionSet.addAction(write)

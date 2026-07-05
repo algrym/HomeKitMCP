@@ -117,7 +117,10 @@ nonisolated enum RestorePlanner {
         // HMActionSet.actions is an unordered NSSet, so compare action lists by a canonical
         // sort rather than array order to avoid spurious re-planning across launches.
         func canon(_ a: [SceneAction]) -> [SceneAction] {
-            a.sorted { ($0.accessory, $0.characteristicType) < ($1.accessory, $1.characteristicType) }
+            a.sorted {
+                ($0.accessory, $0.characteristicType, $0.characteristicIdentifier ?? "")
+                    < ($1.accessory, $1.characteristicType, $1.characteristicIdentifier ?? "")
+            }
         }
         for scene in backup.scenes {
             let existingByUUID = curScenesByUUID[scene.uniqueIdentifier]

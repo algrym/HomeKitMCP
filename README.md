@@ -188,6 +188,14 @@ MCP Client (Claude, etc.)
 +---------------------------+
 ```
 
+## Known Limitations
+
+Some things Apple's HomeKit framework does not expose, so this server can't either. See
+[docs/known-limitations.md](docs/known-limitations.md) for the full reasoning.
+
+- **Favorites / "Include in Home View" can't be set programmatically** — no public API exists for it
+  (verified against the SDK headers). Set it by hand in the Home app.
+
 ## Troubleshooting
 
 **"HomeKit permission denied" or no devices found:**

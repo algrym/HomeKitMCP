@@ -44,7 +44,9 @@ class StatusBarController: NSObject, StatusBarBridgeProtocol {
 
     func hideAllWindows() {
         DispatchQueue.main.async {
-            for window in NSApp.windows where window !== self.statusItem.button?.window {
+            // statusItem is nil in headless mode (no menu bar item created), so use
+            // optional chaining — otherwise the IUO access would crash the daemon.
+            for window in NSApp.windows where window !== self.statusItem?.button?.window {
                 window.orderOut(nil)
                 window.setIsVisible(false)
             }

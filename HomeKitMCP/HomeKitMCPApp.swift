@@ -16,9 +16,10 @@ struct HomeKitMCPApp: App {
 
     init() {
         #if targetEnvironment(macCatalyst)
-        if !Self.isHeadless {
-            StatusBarLoader.load()
-        }
+        // Load the AppKit bridge in BOTH modes. Menu-bar mode uses it for the status
+        // item; headless mode uses it purely to hide the Catalyst NSWindow (UIKit's
+        // isHidden can't — it leaves the empty window chrome on screen).
+        StatusBarLoader.load(headless: Self.isHeadless)
         #endif
     }
 
@@ -78,16 +79,10 @@ struct HomeKitMCPApp: App {
 
     #if targetEnvironment(macCatalyst)
     private func dismissWindow() {
-        if let bridge = StatusBarLoader.bridge {
-            bridge.hideAllWindows()
-        } else if Self.isHeadless {
-            // No status bar plugin in headless mode — hide windows and dock icon directly
-            for window in UIApplication.shared.connectedScenes
-                .compactMap({ $0 as? UIWindowScene })
-                .flatMap(\.windows) {
-                window.isHidden = true
-            }
-        }
+        // Both modes route through the AppKit bridge: it does orderOut + setIsVisible(false)
+        // + .accessory policy, which authoritatively hides the Catalyst NSWindow. The old
+        // UIKit isHidden fallback only hid content and left the empty window frame visible.
+        StatusBarLoader.bridge?.hideAllWindows()
     }
     #endif
 }
